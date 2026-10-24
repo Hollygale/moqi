@@ -1,0 +1,2238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>关系鉴定科 · 两个人各写一句</title>
+<meta name="description" content="两个人各写一句话，谁也不许看谁的。写完一起拆开，看看你们有多像。">
+<style>
+:root{
+  --bg:#EDE8E1;
+  --card:#FFFFFF;
+  --ink:#1A1614;
+  --ink2:#5E554E;
+  --ink3:#9C9088;
+  --ink4:#C2B8AE;
+  --line:#E2DACE;
+  --line2:#F0EAE1;
+  --red:#C4362B;
+  --redbg:#FBF0EE;
+  --paper:#FBFAF7;
+  --seal:#C4362B;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,BlinkMacSystemFont,sans-serif;
+  line-height:1.6;min-height:100vh;padding-bottom:60px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{width:100%;max-width:430px;margin:0 auto;padding:22px 18px 0;}
+
+/* ── 抬头 ── */
+.masthead{text-align:center;margin-bottom:14px;}
+.masthead .sub{font-size:9.5px;letter-spacing:.4em;color:var(--ink3);margin-bottom:9px;}
+.masthead h1{margin:0;font-size:24px;font-weight:800;letter-spacing:.16em;}
+.masthead .rule{display:flex;align-items:center;gap:9px;margin:10px 0 8px;}
+.masthead .rule i{flex:1;height:1px;background:var(--line);display:block;}
+.masthead .rule s{width:5px;height:5px;background:var(--red);display:block;text-decoration:none;transform:rotate(45deg);}
+
+/* ── 一句话规则 ── */
+.oneline{text-align:center;margin-bottom:16px;}
+.oneline p{margin:0;font-size:15px;line-height:1.85;color:var(--ink);font-weight:600;letter-spacing:.02em;}
+.oneline span{display:block;font-size:11px;color:var(--ink3);margin-top:5px;letter-spacing:.05em;}
+
+/* ── 三格图示 ── */
+.three{display:flex;align-items:stretch;gap:7px;margin-bottom:16px;}
+.three .st{
+  flex:1;background:var(--card);border:1px solid var(--line);border-radius:13px;
+  padding:12px 8px;text-align:center;
+}
+.three .st b{display:block;font-size:19px;font-family:"Times New Roman",Georgia,serif;color:var(--red);line-height:1;margin-bottom:6px;}
+.three .st span{display:block;font-size:11px;color:var(--ink2);line-height:1.55;letter-spacing:.02em;}
+.three .arw{flex:none;display:flex;align-items:center;color:var(--ink4);font-size:12px;}
+
+/* ── 选项卡 ── */
+.tabs{display:flex;gap:6px;background:#E4DED4;border-radius:11px;padding:3px;margin-bottom:16px;}
+.tabs div{
+  flex:1;text-align:center;font-size:12px;font-weight:700;letter-spacing:.2em;
+  padding:8px 0;border-radius:9px;color:var(--ink2);cursor:pointer;transition:.18s;
+}
+.tabs div.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(26,22,20,.09);}
+
+/* ── 通用卡 ── */
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 16px;margin-bottom:12px;}
+.ctitle{font-size:10.5px;font-weight:700;letter-spacing:.22em;color:var(--ink3);margin:0 0 13px;display:flex;align-items:center;gap:7px;}
+.ctitle::before{content:"";width:3px;height:11px;background:var(--ink);display:block;}
+.ctitle em{margin-left:auto;font-style:normal;letter-spacing:.06em;color:var(--ink4);font-weight:500;}
+
+/* ── 搭档 chips ── */
+.pchips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;margin:0 -2px;scrollbar-width:none;}
+.pchips::-webkit-scrollbar{display:none;}
+.pchip{
+  flex:none;border:1px solid var(--line);background:var(--paper);border-radius:20px;
+  padding:8px 14px;font-size:12.5px;font-weight:600;color:var(--ink2);cursor:pointer;
+  display:flex;align-items:center;gap:7px;transition:.16s;white-space:nowrap;
+}
+.pchip.on{border-color:var(--ink);background:var(--ink);color:#fff;}
+.pchip.add{border-style:dashed;color:var(--ink3);font-weight:500;}
+
+/* ── 表单 ── */
+.field{margin-bottom:11px;}
+.whorow{margin:0 0 12px;}
+.whorow .pchips{margin-top:2px;}
+.saveto{margin:0 0 8px;}
+.flabel{font-size:11.5px;color:var(--ink2);font-weight:700;letter-spacing:.04em;margin-bottom:6px;display:block;}
+input[type=text],textarea{
+  width:100%;border:1px solid var(--line);background:var(--paper);border-radius:11px;
+  padding:11px 12px;font-family:inherit;font-size:14px;line-height:1.6;color:var(--ink);
+  outline:none;transition:border-color .18s,background .18s;
+}
+textarea{resize:none;min-height:96px;}
+input[type=text]:focus,textarea:focus{border-color:var(--ink);background:#fff;}
+textarea::placeholder,input::placeholder{color:#C6BCB2;}
+
+.btn{
+  width:100%;border:none;background:var(--ink);color:#fff;font-family:inherit;font-size:14.5px;
+  font-weight:700;letter-spacing:.14em;padding:14px;border-radius:13px;cursor:pointer;
+  transition:transform .12s,opacity .18s;margin-top:4px;
+}
+.btn:active{transform:scale(.975);}
+.btn.ghost{background:transparent;color:var(--ink2);border:1px solid var(--line);font-size:12.5px;font-weight:600;padding:11px;letter-spacing:.08em;}
+.btn.red{background:var(--red);}
+.btn:disabled{opacity:.38;cursor:default;}
+.btn:disabled:active{transform:none;}
+
+/* ── 写话 ── */
+.who{
+  display:flex;align-items:center;gap:8px;background:var(--redbg);border:1px solid #F0DFDA;
+  border-radius:10px;padding:9px 12px;margin-bottom:13px;
+}
+.who i{
+  width:20px;height:20px;flex:none;border-radius:50%;background:var(--red);color:#fff;
+  font-style:normal;font-size:11px;font-weight:800;display:flex;align-items:center;
+  justify-content:center;letter-spacing:0;
+}
+.who b{font-size:12.5px;letter-spacing:.04em;}
+.who span{margin-left:auto;font-size:10px;color:var(--ink3);letter-spacing:.06em;}
+
+.stepbar{display:flex;align-items:center;gap:6px;margin-bottom:15px;}
+.stepbar i{flex:1;height:2px;background:var(--line2);display:block;border-radius:2px;}
+.stepbar i.on{background:var(--ink);}
+.stepbar u{text-decoration:none;font-size:9.5px;color:var(--ink4);letter-spacing:.1em;flex:none;}
+.stepbar u.on{color:var(--ink);font-weight:700;}
+
+.sealed{
+  border:1px dashed var(--ink4);background:var(--paper);border-radius:11px;padding:13px 12px;
+  margin-bottom:12px;display:flex;align-items:center;gap:10px;
+}
+.sealed .lk{font-size:15px;opacity:.55;}
+.sealed div{flex:1;min-width:0;}
+.sealed b{display:block;font-size:12px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.24em;}
+.sealed span{display:block;font-size:10px;color:var(--ink4);margin-top:2px;}
+
+.warn{
+  background:#FFF4E5;border:1px dashed #D0392A;border-radius:8px;
+  padding:10px 12px;margin:0 0 12px;font-size:12.5px;line-height:1.75;
+  color:#8A3A18;text-align:left;
+}
+.warn b{color:#D0392A;}
+.warn .go{
+  display:inline-block;margin-top:7px;padding:5px 10px;border-radius:6px;
+  background:#D0392A;color:#fff;font-size:12px;letter-spacing:.5px;
+}
+.tip{
+  font-size:11.5px;color:var(--ink2);line-height:1.8;background:var(--paper);
+  border:1px solid var(--line2);border-radius:10px;padding:11px 12px;margin-bottom:12px;
+}
+.tip b{color:var(--ink);}
+
+/* ── 信封 / 房间码 ── */
+.codebox{
+  text-align:center;background:var(--paper);border:1px dashed var(--ink4);
+  border-radius:14px;padding:17px 12px 15px;margin-bottom:12px;
+}
+.codebox .lb{font-size:10px;letter-spacing:.24em;color:var(--ink3);margin-bottom:9px;}
+.codebox .num{
+  font-family:"Times New Roman",Georgia,serif;font-size:42px;font-weight:700;
+  letter-spacing:.3em;line-height:1;color:var(--red);text-indent:.3em;
+  font-variant-numeric:tabular-nums;
+}
+.codebox .sub{font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.75;}
+.linkbox{
+  display:flex;gap:8px;align-items:center;margin-bottom:11px;
+}
+.linkbox input{
+  flex:1;min-width:0;font-size:11px;padding:9px 10px;color:var(--ink3);
+  background:var(--paper);border:1px solid var(--line);border-radius:10px;
+}
+.linkbox button{
+  flex:none;border:none;background:var(--ink);color:#fff;font-family:inherit;font-size:12px;
+  font-weight:700;letter-spacing:.1em;padding:9px 14px;border-radius:10px;cursor:pointer;
+}
+.linkbox button:active{transform:scale(.96);}
+
+/* ── 解锁 ── */
+.unlockbox{text-align:center;padding:6px 0 2px;}
+.unlockbox .ic{font-size:34px;line-height:1;margin-bottom:10px;}
+.unlockbox .t{font-size:15px;font-weight:700;margin-bottom:5px;}
+.unlockbox .s{font-size:11.5px;color:var(--ink3);line-height:1.8;margin-bottom:15px;}
+.codein{
+  display:flex;gap:8px;justify-content:center;margin-bottom:6px;
+}
+.codein input{
+  width:52px;text-align:center;font-family:"Times New Roman",Georgia,serif;
+  font-size:26px;font-weight:700;letter-spacing:0;padding:11px 0;
+  border:1px solid var(--line);background:var(--paper);border-radius:11px;
+}
+.codein input:focus{border-color:var(--ink);background:#fff;}
+.err{font-size:11.5px;color:var(--red);min-height:18px;margin-bottom:6px;}
+
+/* ── 报告 ── */
+.report{position:relative;background:var(--card);border:1px solid var(--ink);border-radius:4px;overflow:hidden;margin-bottom:12px;}
+.report .topband{height:3px;background:var(--red);}
+.report .head{display:flex;justify-content:space-between;align-items:flex-start;padding:15px 16px 0;}
+.report .no{font-size:9px;letter-spacing:.14em;color:var(--ink3);line-height:1.6;font-variant-numeric:tabular-nums;}
+.stamp{border:1.6px solid var(--red);color:var(--red);border-radius:6px;padding:3px 7px;font-size:9px;font-weight:700;letter-spacing:.12em;transform:rotate(-7deg);opacity:.92;white-space:nowrap;}
+
+.quotes{margin:14px 16px 0;display:grid;gap:8px;}
+.qt{border:1px solid var(--line2);border-radius:11px;padding:11px 12px;background:var(--paper);}
+.qt .lab{font-size:9px;letter-spacing:.2em;color:var(--ink3);margin-bottom:6px;display:flex;justify-content:space-between;}
+.qt p{margin:0;font-size:13.5px;line-height:1.72;color:var(--ink);word-break:break-word;}
+.qt p.none{color:var(--ink4);font-style:italic;}
+
+.scorezone{text-align:center;padding:18px 16px 4px;}
+.scorezone .label{font-size:9.5px;letter-spacing:.3em;color:var(--ink3);margin-bottom:7px;}
+.bignum{font-family:"Times New Roman",Georgia,serif;font-weight:700;letter-spacing:-.02em;line-height:1;color:var(--ink);font-size:74px;font-variant-numeric:tabular-nums;}
+.bignum.long{font-size:38px;letter-spacing:-.01em;}
+.bignum.mid{font-size:56px;}
+.scorezone .unit{font-size:11px;color:var(--ink3);letter-spacing:.24em;margin-top:9px;}
+.scalebar{margin:14px auto 0;height:3px;width:calc(100% - 32px);background:var(--line2);position:relative;border-radius:2px;}
+.scalebar span{position:absolute;top:-4px;width:11px;height:11px;background:var(--red);border-radius:50%;border:2px solid #fff;}
+
+/* 六个等级 */
+.tierbadge{display:flex;align-items:center;justify-content:center;gap:9px;margin:11px 0 1px;color:var(--ink);}
+.tierbadge svg{width:27px;height:27px;color:var(--red);flex:0 0 auto;}
+.tierbadge b{font-size:14px;letter-spacing:.18em;font-weight:700;color:var(--red);}
+.tierbadge span{font-size:13px;color:var(--ink2);}
+.spec{margin:20px 16px 0;border-top:1px dashed var(--line);padding-top:15px;}
+.spec h4{text-align:center;font-size:12px;letter-spacing:.32em;color:var(--ink2);margin:0 0 4px;font-weight:600;}
+.spec .ssub{text-align:center;font-size:11px;color:var(--ink4);margin-bottom:13px;line-height:1.7;}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.tg{position:relative;text-align:center;padding:12px 3px 9px;border:1px solid var(--line);border-radius:10px;background:var(--paper);cursor:pointer;}
+.tg svg{width:31px;height:31px;display:block;margin:0 auto 6px;color:var(--ink);}
+.tg .tc{font-size:11px;letter-spacing:.16em;font-weight:700;}
+.tg .tn{font-size:11px;color:var(--ink2);margin-top:2px;}
+.tg .tr{font-size:9px;color:var(--ink4);margin-top:3px;letter-spacing:.03em;}
+.tg.on{border-color:var(--red);background:var(--redbg);}
+.tg.on svg{color:var(--red);}
+.tg.on .tc{color:var(--red);}
+.tg.lock{border-style:dashed;background:transparent;}
+.tg.lock svg{color:var(--ink4);opacity:.45;}
+.tg.lock .tc,.tg.lock .tn{color:var(--ink4);}
+.tg .flag{position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--red);color:#fff;font-size:9px;letter-spacing:.1em;padding:2px 7px;border-radius:8px;white-space:nowrap;}
+.tinfo{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--paper);}
+.tinfo .th{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;}
+.tinfo .th svg{width:22px;height:22px;color:var(--red);}
+.tinfo .th em{font-style:normal;font-size:11px;font-weight:400;color:var(--ink4);letter-spacing:.1em;}
+.tinfo p{margin:7px 0 0;font-size:12.5px;line-height:1.8;color:var(--ink2);}
+.tinfo.lock{border-style:dashed;}
+.tinfo.lock .th svg{color:var(--ink4);opacity:.45;}
+.tinfo.lock .th{color:var(--ink3);}
+.spec .shint{text-align:center;font-size:11px;color:var(--ink4);margin-top:12px;line-height:1.7;}
+.verdict{padding:17px 20px 19px;text-align:center;border-top:1px dashed var(--line);margin:16px 16px 0;}
+.verdict p{margin:0;font-size:17px;font-weight:700;line-height:1.62;letter-spacing:.02em;}
+
+/* ── 三项 ── */
+.dims{margin:0 16px 4px;border-top:1px solid var(--line2);padding-top:15px;}
+.dimsh{font-size:10px;letter-spacing:.2em;color:var(--ink3);font-weight:700;margin-bottom:13px;}
+.dim{margin-bottom:15px;}
+.dim:last-child{margin-bottom:4px;}
+.dim .top{display:flex;align-items:center;gap:9px;margin-bottom:6px;}
+.dim .dn{font-size:13px;color:var(--ink);font-weight:700;letter-spacing:.01em;}
+.dim .lv{
+  margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.06em;
+  padding:2px 9px;border-radius:20px;background:var(--paper);border:1px solid var(--line);color:var(--ink2);flex:none;
+}
+.dim .lv.hi{background:var(--ink);border-color:var(--ink);color:#fff;}
+.dim .lv.lo{background:var(--redbg);border-color:#F0DFDA;color:var(--red);}
+.dim .db{flex-basis:100%;height:5px;background:var(--line2);border-radius:3px;overflow:hidden;}
+.dim .db i{display:block;height:100%;background:var(--ink);border-radius:3px;}
+.dim .note{font-size:12px;color:var(--ink2);line-height:1.75;margin-top:7px;}
+.dim .term{font-size:9.5px;color:var(--ink4);letter-spacing:.1em;margin-top:5px;}
+
+/* ── 合计 ── */
+.sum{margin:0 16px 12px;background:var(--paper);border:1px solid var(--line2);border-radius:11px;padding:13px 14px;}
+.sum .nums{font-size:12px;color:var(--ink2);letter-spacing:.02em;}
+.sum .nums b{font-family:"Times New Roman",Georgia,serif;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
+.sum .fin{font-size:14px;font-weight:700;margin-top:8px;padding-top:9px;border-top:1px dashed var(--line);letter-spacing:.02em;}
+.sum .fin b{font-family:"Times New Roman",Georgia,serif;font-size:20px;color:var(--red);font-variant-numeric:tabular-nums;}
+.sum .why{font-size:12px;color:var(--ink2);line-height:1.75;margin-top:7px;}
+
+.basis{margin:0 16px 14px;background:var(--paper);border:1px solid var(--line2);border-radius:11px;padding:13px 14px;}
+.basis h4{margin:0 0 8px;font-size:9.5px;letter-spacing:.2em;color:var(--ink3);font-weight:700;}
+.basis ul{margin:0;padding:0;list-style:none;}
+.basis li{font-size:12px;color:var(--ink2);line-height:1.75;padding-left:11px;position:relative;}
+.basis li::before{content:"—";position:absolute;left:0;color:var(--ink4);}
+.basis .fm{font-size:10px;color:var(--ink4);margin-top:9px;letter-spacing:.04em;}
+
+.acts{padding:0 16px 16px;display:flex;gap:8px;}
+.acts button{flex:1;}
+
+/* ── 存档条 ── */
+.saverow{margin:0 16px 16px;background:var(--paper);border:1px solid var(--line2);border-radius:12px;padding:13px 14px;}
+.saverow .st{font-size:12px;font-weight:700;margin-bottom:9px;}
+.saverow input{margin-bottom:9px;}
+.saverow .rel{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:11px;}
+.saverow .rel span{
+  font-size:11px;padding:5px 11px;border:1px solid var(--line);border-radius:16px;
+  color:var(--ink2);cursor:pointer;background:#fff;
+}
+.saverow .rel span.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+.saverow .done{font-size:12px;color:var(--ink2);text-align:center;padding:4px 0;}
+.saverow .done b{color:var(--ink);}
+
+/* ── 档案 ── */
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:11px;overflow:hidden;}
+.pcard .ph{padding:15px 16px;display:flex;align-items:center;gap:11px;cursor:pointer;}
+.pcard .av{width:36px;height:36px;flex:none;border-radius:12px;background:var(--redbg);border:1px solid #F0DFDA;display:flex;align-items:center;justify-content:center;color:var(--red);font-size:14px;font-weight:800;}
+.pcard .info{flex:1;min-width:0;}
+.pcard .info b{display:block;font-size:14.5px;letter-spacing:.04em;}
+.pcard .info span{display:block;font-size:10px;color:var(--ink3);letter-spacing:.06em;margin-top:2px;}
+.pcard .arrow{color:var(--ink4);font-size:15px;flex:none;transition:transform .2s;}
+.pcard.open .arrow{transform:rotate(90deg);}
+.pcard .body{display:none;border-top:1px solid var(--line2);padding:14px 16px;}
+.pcard.open .body{display:block;}
+svg.spark{display:block;width:100%;height:auto;}
+.hrow{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px dotted var(--line);cursor:pointer;}
+.hrow:last-child{border-bottom:none;}
+.hrow .d{font-size:10px;color:var(--ink3);width:44px;flex:none;font-variant-numeric:tabular-nums;}
+.hrow .v{font-family:"Times New Roman",Georgia,serif;font-weight:700;font-size:15px;width:62px;flex:none;font-variant-numeric:tabular-nums;}
+.hrow .v.long{font-size:11.5px;}
+.hrow .t{flex:1;min-width:0;font-size:11px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.del{margin-top:11px;font-size:10.5px;color:var(--ink4);letter-spacing:.1em;background:none;border:none;font-family:inherit;text-decoration:underline;cursor:pointer;padding:0;}
+
+/* ── 搭档档案详情 ── */
+.pdet .ptop{padding:16px 16px 12px;display:flex;align-items:center;gap:12px;}
+.pdet .ptop .av{width:44px;height:44px;flex:none;border-radius:14px;background:var(--redbg);border:1px solid #F0DFDA;display:flex;align-items:center;justify-content:center;color:var(--red);font-size:17px;font-weight:800;}
+.pdet .ptop .info{flex:1;min-width:0;}
+.pdet .ptop b{display:block;font-size:17px;letter-spacing:.05em;}
+.pdet .ptop span{display:block;font-size:10.5px;color:var(--ink3);letter-spacing:.07em;margin-top:3px;}
+.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 16px 4px;}
+.statgrid .s{background:var(--paper);border:1px solid var(--line2);border-radius:11px;padding:10px 4px 9px;text-align:center;}
+.statgrid .s b{display:block;font-family:"Times New Roman",Georgia,serif;font-weight:700;font-size:18px;line-height:1.25;font-variant-numeric:tabular-nums;}
+.statgrid .s b.sm{font-size:14.5px;}
+.statgrid .s span{display:block;font-size:9.5px;color:var(--ink3);letter-spacing:.1em;margin-top:3px;}
+.trend{margin:12px 16px 0;font-size:12px;color:var(--ink2);line-height:1.85;background:var(--paper);border:1px solid var(--line2);border-radius:11px;padding:11px 13px;}
+.trend b{font-family:"Times New Roman",Georgia,serif;font-size:14.5px;}
+.sech{margin:18px 16px 2px;font-size:9.5px;letter-spacing:.2em;color:var(--ink3);font-weight:700;}
+.pdet .hrows{margin:0 16px;}
+.morelink{display:block;width:100%;text-align:center;font-size:11px;letter-spacing:.12em;color:var(--ink3);background:var(--paper);border:1px solid var(--line2);border-radius:9px;padding:8px 0;margin-top:10px;font-family:inherit;cursor:pointer;}
+.morelink:hover{color:var(--ink);}
+
+/* ── 分享卡片 ── */
+.sharebox{margin:0 16px 12px;}
+.sharebox img{width:100%;display:block;border-radius:13px;border:1px solid var(--line);background:#fff;}
+.sharebox .ph{width:100%;border-radius:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink4);font-size:11.5px;padding:40px 0;text-align:center;}
+.chiprow{display:flex;gap:7px;margin:0 16px 12px;}
+.chiprow span{flex:1;text-align:center;font-size:11.5px;padding:8px 4px;border:1px solid var(--line);border-radius:20px;color:var(--ink2);background:#fff;cursor:pointer;}
+.chiprow span.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+.sharetip{margin:0 16px 14px;font-size:11px;color:var(--ink3);line-height:1.8;text-align:center;}
+
+.empty{text-align:center;padding:26px 10px 12px;color:var(--ink3);font-size:12.5px;line-height:1.95;}
+.empty .em{font-size:26px;display:block;margin-bottom:8px;opacity:.45;}
+
+.foot{text-align:center;color:var(--ink3);font-size:10px;line-height:1.9;padding:6px 8px 0;letter-spacing:.03em;}
+.foot b{color:var(--ink2);font-weight:600;}
+
+.toast{
+  position:fixed;left:50%;bottom:32px;transform:translate(-50%,14px);background:var(--ink);
+  color:#fff;font-size:12.5px;letter-spacing:.05em;padding:11px 20px;border-radius:22px;
+  opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;z-index:99;
+  max-width:86vw;text-align:center;line-height:1.6;
+}
+.toast.on{opacity:1;transform:translate(-50%,0);}
+
+.fadein{animation:fi .38s cubic-bezier(.22,.9,.3,1) both;}
+@keyframes fi{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.pop{animation:pop .45s cubic-bezier(.2,1.06,.3,1) both;}
+@keyframes pop{from{opacity:0;transform:scale(.955);}to{opacity:1;transform:none;}}
+.unfold{animation:uf .5s cubic-bezier(.2,.9,.3,1) both;}
+.unfold.d2{animation-delay:.12s;}
+@keyframes uf{from{opacity:0;transform:translateY(-7px);clip-path:inset(0 0 100% 0);}to{opacity:1;transform:none;clip-path:inset(0 0 0 0);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="masthead">
+    <div class="sub">MUTUAL BLIND APPRAISAL</div>
+    <h1>关系鉴定科</h1>
+    <div class="rule"><i></i><s></s><i></i></div>
+  </div>
+  <div class="tabs">
+    <div id="tabToday" class="on">开 始</div>
+    <div id="tabArc">档 案</div>
+  </div>
+  <div id="app"></div>
+  <div class="foot">
+    从 0 分到 100 分，本中心照单全收。<br>
+    <b>本工具不构成任何关于感情的建议，也不打算构成。</b>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ══════════════ 小工具 ══════════════ */
+function p2(n){ return (n < 10 ? "0" : "") + n; }
+function todayKey(){ var d = new Date(); return "" + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()); }
+function md(k){ return (+k.slice(4,6)) + "月" + (+k.slice(6,8)) + "日"; }
+/* 同一天测了多次时，标签补上「第 N 次」 */
+function recLabel(k){
+  var m = String(k).match(/#(\d+)$/);
+  return m ? md(k) + " 第" + m[1] + "次" : md(k);
+}
+function clamp(v, a, b){ return v < a ? a : (v > b ? b : v); }
+function r2(v){ return Math.round(v * 100) / 100; }
+function esc(s){
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+    return ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[c];
+  });
+}
+function chars(s){ return Array.from(String(s || "")); }
+function newId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+/* 分数显示：最多 6 位小数，去掉尾随 0 */
+function scoreText(v){
+  var x = Math.round(v * 1e6) / 1e6;
+  var t = x.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
+  return t;
+}
+
+/* ══════════════ 信封加密（房间码即密钥） ══════════════ */
+function utf8(str){
+  if(typeof TextEncoder !== "undefined"){
+    return Array.from(new TextEncoder().encode(str));
+  }
+  var out = [], s = unescape(encodeURIComponent(str));
+  for(var i = 0; i < s.length; i++) out.push(s.charCodeAt(i));
+  return out;
+}
+function utf8dec(bytes){
+  if(typeof TextDecoder !== "undefined"){
+    try{ return new TextDecoder().decode(new Uint8Array(bytes)); }catch(e){}
+  }
+  var s = "";
+  for(var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  try{ return decodeURIComponent(escape(s)); }catch(e){ return s; }
+}
+function rc4ks(key){
+  var s = [], i, j = 0, t;
+  for(i = 0; i < 256; i++) s[i] = i;
+  for(i = 0; i < 256; i++){
+    j = (j + s[i] + key[i % key.length]) % 256;
+    t = s[i]; s[i] = s[j]; s[j] = t;
+  }
+  return s;
+}
+function rc4run(S, bytes){
+  var out = [], i = 0, j = 0, y, t;
+  for(y = 0; y < bytes.length; y++){
+    i = (i + 1) % 256;
+    j = (j + S[i]) % 256;
+    t = S[i]; S[i] = S[j]; S[j] = t;
+    out.push(bytes[y] ^ S[(S[i] + S[j]) % 256]);
+  }
+  return out;
+}
+function b64url(bytes){
+  var s = btoa(String.fromCharCode.apply(null, bytes));
+  return s.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function unb64url(str){
+  var s = String(str).replace(/-/g, "+").replace(/_/g, "/");
+  while(s.length % 4) s += "=";
+  var bin;
+  try{ bin = atob(s); }catch(e){ return null; }
+  var out = [];
+  for(var i = 0; i < bin.length; i++) out.push(bin.charCodeAt(i));
+  return out;
+}
+var MAGIC = "MQ1|";
+var WEB = "https://hollygale.github.io/moqi/";
+/* 入口二维码矩阵（离线生成，pyzbar 实测可扫） */
+var QRN = 33;
+var QR = "000000000000000000000000000000000000000000000000000000000000000000001111111001011010000100111111100001000001001010000111000100000100001011101001101011010000101110100001011101001110100101000101110100001011101000110000001000101110100001000001011011001110110100000100001111111010101010101010111111100000000000000110101110010000000000001001011011111010101011010000000000110100111001101100010100100100001001001100110111010100101111000001100000101100100100110011011000000110101010010011110111100101100001010100110000111100111000000000001101001011101110011011111111100000011100111000000111010101101000000000011011111101010111000001000000110000100100110010001110100100001001101011100010010010110001100000011100000010011111110101001100001000101111100001101111111010000000000000010000010100110001011100001111111001110000110010101001000001000001011111011001110001110000001011101001000000010011111000100001011101011110100000100111111000001011101000000010010100001110100001000001001100010111110110001000001111111010010101010010000101000000000000000000000000000000000000000000000000000000000000000000000";
+function seal(plain, code){
+  var bytes = utf8(MAGIC + plain);
+  var iv = [];
+  for(var i = 0; i < 4; i++) iv.push(Math.floor(Math.random() * 256));
+  var key = utf8("moqi-seal:" + code + ":" + iv.join("-"));
+  var enc = rc4run(rc4ks(key), bytes);
+  return b64url(iv.concat(enc));
+}
+function unseal(token, code){
+  var all = unb64url(token);
+  if(!all || all.length < 5) return null;
+  var iv = all.slice(0, 4), enc = all.slice(4);
+  var key = utf8("moqi-seal:" + code + ":" + iv.join("-"));
+  var str = utf8dec(rc4run(rc4ks(key), enc));
+  if(str.indexOf(MAGIC) !== 0) return null;
+  return str.slice(MAGIC.length);
+}
+/* 钥匙直接跟着链接走：收到的人不用再输密码 */
+function newSecret(){
+  var A = "abcdefghijkmnpqrstuvwxyz23456789", c = "";
+  for(var i = 0; i < 8; i++) c += A.charAt(Math.floor(Math.random() * A.length));
+  return c;
+}
+function baseURL(){ return location.href.split("#")[0]; }
+/* 打包成一条链接：#e<钥匙>_<密文> 或 #r<钥匙>_<密文> */
+function packURL(tag, plain){
+  var s = newSecret();
+  var t = seal(plain, s);
+  return { secret: s, token: t, url: baseURL() + "#" + tag + s + "_" + t };
+}
+function unpackHash(h){
+  if(!h) return null;
+  var tag = h.charAt(0);
+  if(tag !== "e" && tag !== "r") return null;
+  var rest = h.slice(1);
+  var i = rest.indexOf("_");
+  if(i < 1 || i >= rest.length - 1) return null;
+  return { kind: (tag === "r") ? "report" : "envelope", secret: rest.slice(0, i), token: rest.slice(i + 1) };
+}
+
+/* ══════════════ 语料库 ══════════════ */
+/* ══════════════ 六个等级 · 关系谱系 ══════════════ */
+var TIERS = [
+  {
+    n: 6, code: "MR", name: "双面镜", min: 88, max: 100,
+    one: "你们在互相照。",
+    art: '<path d="M18 11h-7a3 3 0 0 0-3 3v20a3 3 0 0 0 3 3h7"/><path d="M30 11h7a3 3 0 0 1 3 3v20a3 3 0 0 1-3 3h-7"/><path d="M24 8v32" stroke-dasharray="2 3"/>',
+    pool: [
+      "就是你了，跑不掉。",
+      "检出共享脑回路，网速不同但信号同源。",
+      "一人前半句，一人后半句，句号都懒得抢。",
+      "相似度过高，疑似同一人分饰两角。",
+      "你们的脑电图放在一起会被误认为一张。",
+      "这个分数出现在我们数据库里的概率是百分之零点三。恭喜。",
+      "连沉默都是押韵的。",
+      "就算什么都不说，也不会尴尬到需要打开手机。"
+    ]
+  },
+  {
+    n: 5, code: "EC", name: "回声壁", min: 72, max: 87,
+    one: "你说一句，TA 那儿会响两下。",
+    art: '<circle cx="12" cy="24" r="2" fill="currentColor" stroke="none"/><path d="M20 16a12 12 0 0 1 0 16"/><path d="M27 12a18 18 0 0 1 0 24"/><path d="M34 9a24 24 0 0 1 0 30"/>',
+    pool: [
+      "你们上辈子在同一个山洞里啃树皮，啃的是同一张。",
+      "你们的默契会让第三个人显得很多余。",
+      "你们共享一套没人听得懂的语法。",
+      "你们之间有一条看不见的线，材质不明。",
+      "前世一起读过同一本书，读的是同一页。",
+      "你们的相遇被记录在一份没人归档的文件里。",
+      "很久以前你们答应的事，现在还算数吗。",
+      "本中心很少给这个分数，今天给了，你们看着办。"
+    ]
+  },
+  {
+    n: 4, code: "PL", name: "平行线", min: 56, max: 71,
+    one: "走得很近，一直没交叉。",
+    art: '<path d="M8 18h32"/><path d="M8 30h32"/><circle cx="20" cy="18" r="2.2" fill="currentColor" stroke="none"/><circle cx="28" cy="30" r="2.2" fill="currentColor" stroke="none"/>',
+    pool: [
+      "有默契，但需要翻译。",
+      "关系稳定，像一块砖。注意说的是砖。",
+      "两个人加起来勉强凑成一个完整的大人。",
+      "沉默共处可撑四十分钟，超过则需要找话题。",
+      "你们聊天像两台打印机在核对标签。",
+      "偶尔有效沟通，其余时候靠眼神和猜。",
+      "目前进度：已交换过联系方式，尚未交换过秘密。",
+      "彼此都没有换头像的必要，也没有不换的理由。"
+    ]
+  },
+  {
+    n: 3, code: "DF", name: "偏移角", min: 40, max: 55,
+    one: "大方向一样，细节各说各的。",
+    art: '<path d="M8 34h32" stroke-dasharray="3 3"/><path d="M8 34 38 13"/><path d="M18 34a10 10 0 0 1 8.6-5"/>',
+    pool: [
+      "不太熟，但也不讨厌，这是一种非常稳定的状态。",
+      "换算成缘分的话，大概是 0.7 个擦肩而过。",
+      "对话里有百分之四十在跑题，但没人介意。",
+      "有一点点心意，藏在句号和语气词后面。",
+      "建议维持这个距离，再近就要互相借东西了。",
+      "关系尚可，请勿懈怠。建议本周至少主动一次。",
+      "检出大量未说出口的话，堆得很整齐。",
+      "你们同时想到了同一件事，然后各自说成了另一件。"
+    ]
+  },
+  {
+    n: 2, code: "ST", name: "串 台", min: 22, max: 39,
+    one: "信号在，但夹着杂音。",
+    art: '<path d="M6 24l6-11 6 20 6-22 6 24 6-17 6 6"/>',
+    pool: [
+      "信号收到了，解码失败。",
+      "两个人在同一张桌上，各自点了自己的菜。",
+      "你们对同一个词的理解相差约三个时区。",
+      "频道是对的，音量没对上。",
+      "对话里有一半是礼貌，另一半是不知道说什么。",
+      "建议从「今天吃什么」重新起步。",
+      "彼此都以为对方听懂了。没有。",
+      "这份样本会被归入「还在找信号」序列。"
+    ]
+  },
+  {
+    n: 1, code: "VD", name: "空频道", min: 0, max: 21,
+    one: "两台设备，同一个空白。",
+    art: '<circle cx="24" cy="24" r="14" stroke-dasharray="3 4"/><path d="M16 24h6"/><path d="M26 24h6"/>',
+    pool: [
+      "两台设备，同一个空白。",
+      "你们写的这两句话，互相不是回答。",
+      "本中心记录到两次发言，未记录到一次对话。",
+      "这次鉴定的主要成果是：确认了你们不太熟。",
+      "别灰心，二十几分也是一种成绩。",
+      "仪器没有故障。它只是没什么可报的。",
+      "建议换一天、换个话题，或者换个人。",
+      "空白也是一种结果，已归档。"
+    ]
+  }
+];
+function tierOf(sc){
+  for(var i = 0; i < TIERS.length; i++) if(sc >= TIERS[i].min) return TIERS[i];
+  return TIERS[TIERS.length - 1];
+}
+function tierByCode(c){
+  for(var i = 0; i < TIERS.length; i++) if(TIERS[i].code === c) return TIERS[i];
+  return null;
+}
+function tierArt(t){
+  return '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + t.art + '</svg>';
+}
+/* 本机档案里已经开出过哪些等级 */
+function seenTiers(){
+  var db = load(), seen = {}, i, k;
+  for(i = 0; i < db.partners.length; i++){
+    var recs = db.partners[i].records || {};
+    for(k in recs){
+      if(!Object.prototype.hasOwnProperty.call(recs, k)) continue;
+      var r = recs[k];
+      seen[r.tier || tierOf(r.score).code] = 1;
+    }
+  }
+  if(S.report) seen[S.report.tier || tierOf(S.report.score).code] = 1;
+  return seen;
+}
+var RELS = [
+  { k: "couple", n: "情侣" }, { k: "friend", n: "朋友" }, { k: "buddy", n: "饭搭子" },
+  { k: "colleague", n: "同事" }, { k: "family", n: "家人" }, { k: "classmate", n: "同学" },
+  { k: "unknown", n: "不好说" }, { k: "secret", n: "不能说" }
+];
+function relName(k){
+  for(var i = 0; i < RELS.length; i++) if(RELS[i].k === k) return RELS[i].n;
+  return "不好说";
+}
+
+/* ══════════════ 特征提取 ══════════════ */
+var STOPCH = "的了着过是就有个不和也都很要与对而及为以于把被让给向吧啊呢嘛哦嗯么啥呗啰还要说到去来上下中大小多少好真的觉现在";
+var DEG = ["太","很","超级","特别","巨","最","有点","稍微","非常","挺","贼","老","极","爆","巨tm","十分","相当","蛮"];
+var MODAL = ["啊","呀","呢","吧","哦","啦","哈","嘛","呗","咯","哒","诶","噢","嗯","嘞","惹"];
+var EMPH = ["居然","竟然","绝对","一定","肯定","确实","明明","偏偏","简直","根本","真的","必须","千万"];
+var EMOT = ["想","爱","喜欢","讨厌","累","开心","难过","烦","生气","怕","着急","感动","幸福","无聊","困","饿","疼","爽","崩溃","哭","舍不得"];
+
+function emojiCount(s){
+  var m = String(s).match(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[\u2190-\u21FF\u2600-\u27BF\u2B00-\u2BFF\uFE0F]/g);
+  return m ? m.length : 0;
+}
+function countIn(s, arr){
+  var n = 0, hit = [];
+  for(var i = 0; i < arr.length; i++){
+    if(s.indexOf(arr[i]) > -1){ n++; hit.push(arr[i]); }
+  }
+  return { n: n, hit: hit };
+}
+function punctStrong(s){
+  var m = String(s).match(/[!！?？~～]+|\.{3,}|…+/g);
+  return m ? m.length : 0;
+}
+function repeatCount(s){
+  /* 叠词与拖长：哈哈哈 / 行行行 / 真的真的 */
+  var n = 0, m = String(s).match(/([\u4e00-\u9fa5])\1{1,}/g);
+  if(m) n += m.length;
+  var m2 = String(s).match(/([\u4e00-\u9fa5]{2,3})\1/g);
+  if(m2) n += m2.length;
+  return n;
+}
+
+/* 一句话的口气强度 —— 不依赖标点也能测 */
+function toneOf(s){
+  var t = String(s || "");
+  var d = countIn(t, DEG), mo = countIn(t, MODAL), em = countIn(t, EMPH), emo = countIn(t, EMOT);
+  var e = emojiCount(t), p = punctStrong(t), rp = repeatCount(t);
+  var v = d.n * 2 + mo.n * 1.2 + em.n * 2 + emo.n * 1.5 + e * 2.5 + p * 0.8 + rp * 1.5;
+  var hit = d.hit.concat(em.hit);
+  if(!hit.length) hit = emo.hit.slice(0, 2);
+  if(!hit.length) hit = mo.hit.slice(0, 2);
+  var mark = [];
+  if(e > 0) mark.push(e + " 个表情");
+  if(p > 0) mark.push(p + " 处感叹或省略");
+  if(rp > 0) mark.push("叠词");
+  if(!mark.length && hit.length) mark = hit.slice(0, 1);
+  return { v: r2(v), hits: hit.slice(0, 2), marks: mark, emoji: e, punct: p, rep: rp };
+}
+
+function features(a, b){
+  a = String(a || ""); b = String(b || "");
+  var ca = chars(a.replace(/\s/g, "")), cb = chars(b.replace(/\s/g, ""));
+  var la = ca.length, lb = cb.length, total = la + lb;
+
+  var setA = {}, setB = {}, i;
+  for(i = 0; i < ca.length; i++) setA[ca[i]] = 1;
+  for(i = 0; i < cb.length; i++) setB[cb[i]] = 1;
+  var sameChar = 0, unionChar = 0;
+  for(var k in setA){ if(setA.hasOwnProperty.call(setA, k)){ unionChar++; if(setB[k]) sameChar++; } }
+  for(var k2 in setB){ if(setB.hasOwnProperty.call(setB, k2) && !setA[k2]) unionChar++; }
+
+  /* 所有长度 ≥2 的公共片段，取最长的几个当"共同词" */
+  var subs = [], used = {};
+  for(var x = 0; x < ca.length - 1; x++){
+    for(var y = 2; y <= Math.min(6, ca.length - x); y++){
+      var seg = ca.slice(x, x + y).join("");
+      if(b.indexOf(seg) > -1 && !used[seg]){
+        used[seg] = 1;
+        if(seg.replace(/[的了着过是就有个不和也都很要与对而及为以于把被让给向吧啊呢嘛哦嗯么啥呗啰还要说到去来上下中大小多少好真的觉现在]/g, "").length >= 2){
+          subs.push(seg);
+        }
+      }
+    }
+  }
+  subs.sort(function(m, n){ return n.length - m.length; });
+  var keep = [], seen = {};
+  for(i = 0; i < subs.length; i++){
+    var covered = false;
+    for(var j = 0; j < keep.length; j++) if(keep[j].indexOf(subs[i]) > -1){ covered = true; break; }
+    if(!covered && !seen[subs[i]]){ seen[subs[i]] = 1; keep.push(subs[i]); }
+  }
+  var words = keep.slice(0, 3);
+
+  var ta = toneOf(a), tb = toneOf(b);
+  return {
+    la: la, lb: lb, total: total,
+    sameChar: sameChar, unionChar: unionChar,
+    words: words, lcs: words.length ? words[0] : "",
+    ta: ta, tb: tb,
+    bothEmpty: la === 0 && lb === 0
+  };
+}
+
+/* ══════════════ 三项比对 ══════════════ */
+/* 每项直接给出 0–100 的分：地板取消，斜率放大一点，好坏都拉得开 */
+function lift(raw){
+  return clamp(clamp(raw, 0, 100) * 1.3 - 15, 0, 100);
+}
+
+function buildDims(f){
+  var dims = [];
+
+  /* ① 你们在说同一件事吗？ */
+  var jac = f.unionChar > 0 ? f.sameChar / f.unionChar : 0;
+  var rawT = 0;
+  if(f.total > 0){
+    rawT = jac * 180 + 14;
+    if(f.words.length >= 1) rawT += 18;
+    if(f.words.length >= 2) rawT += 10;
+    if(f.words.length >= 3) rawT += 6;
+    rawT = clamp(rawT, 0, 100);
+  } else {
+    rawT = 0;
+  }
+  var tNote;
+  if(f.bothEmpty) tNote = "你们俩都没写字。";
+  else if(f.words.length >= 2) tNote = "你们都写了「" + f.words.slice(0, 2).join("」「") + "」。这不太像巧合。";
+  else if(f.words.length === 1) tNote = (f.words[0].length >= 2)
+    ? "你们都写了「" + f.words[0] + "」。同一个词，不是巧合。"
+    : "你们都写了「" + f.words[0] + "」。除此之外基本各说各的。";
+  else if(f.sameChar > 0) tNote = "你们用了 " + f.sameChar + " 个一样的字，但没凑成一个共同的词。";
+  else tNote = "你们俩一个字都没撞上。像是在两个星球上写的。";
+  dims.push({
+    key: "topic", q: "你们在说同一件事吗？", short: "说同一件事", term: "话题重合度", w: 0.40,
+    v: lift(rawT), note: tNote,
+    lv: rawT >= 62 ? "说到了" : (rawT >= 30 ? "沾点边" : "各说各的")
+  });
+
+  /* ② 你们想得一样多吗？ */
+  var rawE, eNote;
+  if(f.la === 0 && f.lb === 0){ rawE = 0; eNote = "你们俩都没写字，这项没法比。"; }
+  else if(f.la === 0 || f.lb === 0){
+    rawE = 4;
+    eNote = "一个写了 " + Math.max(f.la, f.lb) + " 个字，另一个一个字都没写。";
+  } else {
+    var ratio = Math.max(f.la, f.lb) / Math.min(f.la, f.lb);
+    rawE = clamp(100 * Math.pow(Math.min(f.la, f.lb) / Math.max(f.la, f.lb), 0.85), 0, 100);
+    if(ratio < 1.25) eNote = "你写了 " + f.la + " 个字，TA 写了 " + f.lb + " 个。长度差不多。";
+    else if(ratio < 2.2) eNote = "你写了 " + f.la + " 个字，TA 写了 " + f.lb + " 个。差得不算多。";
+    else eNote = "你写了 " + f.la + " 个字，TA 只写了 " + f.lb + " 个。有一个人在唱独角戏。";
+  }
+  dims.push({
+    key: "echo", q: "你们想得一样多吗？", short: "想得一样多", term: "篇幅呼应度", w: 0.30,
+    v: lift(rawE), note: eNote,
+    lv: rawE >= 62 ? "差不多" : (rawE >= 30 ? "差一点" : "差挺多")
+  });
+
+  /* ③ 你们的情绪有关联吗？ */
+  var dist = Math.abs(f.ta.v - f.tb.v);
+  var rawO, oNote, oLv, weak = false;
+  if(f.bothEmpty){
+    rawO = 37;
+    oNote = "你们俩都没写字，但都没走。这种同步的沉默，也算一种同步。";
+    oLv = "都在沉默";
+  } else if((f.ta.v + f.tb.v) < 1.2){
+    weak = true;
+    rawO = 55;
+    oNote = "你们都写得太干净——没有感叹号，也没有语气词。这项今天没法比。";
+    oLv = "没测";
+  } else {
+    rawO = clamp(100 - dist * 22, 0, 100);
+    var ha = f.ta.hits, hb = f.tb.hits;
+    if(rawO >= 62){
+      if(ha.length && hb.length) oNote = "你写了「" + ha[0] + "」，TA 写了「" + hb[0] + "」。劲头差不多。";
+      else if(ha.length || hb.length) oNote = (ha.length ? "你" : "TA") + "用了「" + (ha.length ? ha[0] : hb[0]) + "」，另一个没加什么。整体上劲头差不多。";
+      else oNote = "你们都没用什么感叹号，也没加语气词。两个人今天都很平静。";
+    } else if(rawO >= 30){
+      if(ha.length && hb.length) oNote = "你写了「" + ha[0] + "」，TA 写了「" + hb[0] + "」。一个稍微使劲一点。";
+      else if(ha.length) oNote = "你用了「" + ha.slice(0, 2).join("」「") + "」，TA 没加什么。你的劲儿更大一些。";
+      else if(hb.length) oNote = "TA 用了「" + hb.slice(0, 2).join("」「") + "」，你没加什么。TA 的劲儿更大一些。";
+      else oNote = "两个人都不算激动，但程度不太一样。";
+    } else {
+      if(ha.length && hb.length) oNote = "你写了「" + ha[0] + "」，TA 写了「" + hb[0] + "」。完全不在一个频道上。";
+      else if(ha.length) oNote = "你用了「" + ha.slice(0, 2).join("」「") + "」，TA 什么都没加。一个在喊，一个在打字。";
+      else if(hb.length) oNote = "TA 用了「" + hb.slice(0, 2).join("」「") + "」，你什么都没加。一个在喊，一个在打字。";
+      else oNote = "你们都没用什么感叹号，也没加语气词。两个人今天都很平静。";
+    }
+    oLv = rawO >= 62 ? "有关联" : (rawO >= 30 ? "有一点" : "没关联");
+  }
+  dims.push({
+    key: "tone", q: "你们的情绪有关联吗？", short: "情绪", term: "情绪同步率", w: 0.30,
+    v: lift(rawO), note: oNote, lv: oLv, weak: weak
+  });
+
+  return dims;
+}
+
+/* ══════════════ 鉴定引擎 ══════════════ */
+function hash(str){
+  var h = 2166136261;
+  for(var i = 0; i < str.length; i++){
+    h ^= str.charCodeAt(i);
+    h = (h * 16777619) >>> 0;
+  }
+  return h >>> 0;
+}
+function mix(a, b){
+  var h = a ^ (b + 0x9e3779b9);
+  h = (h ^ (h >>> 16)) >>> 0;
+  h = Math.imul(h, 0x85ebca6b) >>> 0;
+  h = (h ^ (h >>> 13)) >>> 0;
+  h = Math.imul(h, 0xc2b2ae35) >>> 0;
+  return (h ^ (h >>> 16)) >>> 0;
+}
+function pick(arr, seed){ return arr[seed % arr.length]; }
+
+function appraise(a, b, dateKey, pid, relation){
+  var f = features(a, b);
+  var dims = buildDims(f);
+
+  /* 权重：某一项没测时，权重分给其余项 */
+  var live = dims.filter(function(d){ return !d.weak; });
+  var wsum = live.reduce(function(s, d){ return s + d.w; }, 0);
+  var score = 0;
+  for(var i = 0; i < live.length; i++){
+    score += live[i].v * (live[i].w / wsum);
+  }
+  score = clamp(score, 0, 100);
+  /* 再拉开一次：让高分档和低分档都真的够得着 */
+  score = clamp(score * 1.28 - 9, 0, 100);
+
+  /* 种子只由「两句话 + 日期」决定，且两句话谁先谁后都一样：
+     A 端和 B 端、先写的人和后写的人，看到的必须是同一份报告 */
+  var sa = String(a), sb = String(b);
+  var pair = (sa <= sb) ? (sa + "\u0001" + sb) : (sb + "\u0001" + sa);
+  var seed = mix(hash(pair), hash(String(dateKey)));
+  /* 大多时候只留两位小数；偶尔不修约，让分数露出长长的小数尾巴 */
+  var longMode = (seed % 17 === 0);
+  score = longMode ? Math.round(score * 1e6) / 1e6 : Math.round(score * 100) / 100;
+  for(var dj = 0; dj < dims.length; dj++) dims[dj].v = Math.round(dims[dj].v * 10) / 10;
+
+  var tier = tierOf(score);
+
+  var verdict;
+  if(f.bothEmpty) verdict = "两个人都不说话，但都还在这里，这本身就是一种默契。";
+  else verdict = pick(tier.pool, seed);
+
+  /* 还注意到 */
+  var basis = [], all = String(a) + String(b);
+  if(f.words.length) basis.push("你们都提到了「" + f.words[0] + "」。");
+  var q = (all.match(/[?？吗呢]/g) || []).length;
+  if(q > 0) basis.push("有人在试探，有人在接。");
+  if((all.indexOf("…") > -1) || (all.indexOf("...") > -1)) basis.push("有话没说完，写到一半收住了。");
+  if(emojiCount(all) > 0) basis.push("用到了表情。冲突风险低于平均值。");
+  if(all.indexOf("晚安") > -1) basis.push("「晚安」今日在场。");
+  if(/爱|喜欢|想你/.test(all)) basis.push("有人说出了直给的话。仪器需要冷静三秒，已跳过。");
+  if(/别|不要|算了/.test(all)) basis.push("省略了铺垫环节，说明彼此已经懒得客气。");
+  if((all.match(/哈/g) || []).length >= 3) basis.push("笑了好几次，其中真笑次数不予公布。");
+  if(f.sameChar === 0 && f.total > 0) basis.push("用词零重叠。这是在各自星球上写的两句话。");
+  if(basis.length < 2) basis.push("建议明天再测一次，好有个对照。");
+
+  /* 归因 */
+  var sorted = live.slice().sort(function(x, y){ return y.v - x.v; });
+  var why;
+  var names = ["零", "一", "两", "三"];
+  var hi = sorted[0], lo = sorted[sorted.length - 1];
+  var cnt = names[Math.min(live.length, 3)];
+  if(!hi) why = "今天几乎没有能比的东西。";
+  else if(hi.v - lo.v < 5) why = cnt + "项都差不多，没有哪一项特别突出。";
+  else why = "主要是「" + hi.short + "」把分数拉上去的，「" + lo.short + "」拖了点后腿。";
+
+  return {
+    score: score, dims: dims, basis: basis, verdict: verdict, why: why, long: longMode, tier: tier.code,
+    a: a, b: b, date: dateKey, pid: pid || "", relation: relation || "unknown",
+    no: "NO." + String(seed % 900000 + 100000),
+    code: ""
+  };
+}
+
+/* ══════════════ 存储 ══════════════ */
+var KEY = "moqi_v4";
+var DB0 = { partners: [], lastId: null };
+function load(){
+  try{
+    var s = localStorage.getItem(KEY);
+    if(!s) return { partners: [], lastId: null };
+    var o = JSON.parse(s);
+    if(!o || !Array.isArray(o.partners)) return { partners: [], lastId: null };
+    return o;
+  }catch(e){ return { partners: [], lastId: null }; }
+}
+function save(db){
+  try{
+    localStorage.setItem(KEY, JSON.stringify(db));
+    return true;
+  }catch(e){ return false; }
+}
+function findPartner(db, id){
+  if(!id) return null;
+  for(var i = 0; i < db.partners.length; i++) if(db.partners[i].id === id) return db.partners[i];
+  return null;
+}
+function stripRefs(r){
+  var o = {}, k;
+  for(k in r){ if(Object.prototype.hasOwnProperty.call(r, k) && k !== "_p") o[k] = r[k]; }
+  return o;
+}
+/* 同一天可以存多份：第一份用日期本身，之后依次 #2 #3，这样曲线才有多个点 */
+function nextRecKey(p, dateKey){
+  var recs = p.records || {};
+  if(recs[dateKey] === undefined) return dateKey;
+  var i = 2;
+  while(recs[dateKey + "#" + i] !== undefined) i++;
+  return dateKey + "#" + i;
+}
+/* 自动归档：已经知道是跟谁测的，就直接存进去，不用再手动点一次 */
+function autoSave(){
+  if(!S.report || S.saved) return false;
+  var db = load();
+  var p = S.partnerId ? findPartner(db, S.partnerId) : null;
+  if(!p && S.partnerName){
+    var nm = S.partnerName;
+    for(var i = 0; i < db.partners.length; i++) if(db.partners[i].name === nm){ p = db.partners[i]; break; }
+  }
+  /* 对方设备上建的档案：本机没有，就按同一个 id 建一份，这样两边档案是同一个人的 */
+  if(!p && S.partnerId && S.partnerName){
+    p = { id: S.partnerId, name: S.partnerName, relation: S.rel || "unknown", records: {}, created: todayKey() };
+    db.partners.push(p);
+  }
+  if(!p) return false;
+  p.records = p.records || {};
+  if(!p.relation || p.relation === "unknown") p.relation = S.rel || "unknown";
+  p.records[nextRecKey(p, S.report.date || todayKey())] = stripRefs(S.report);
+  S.partnerId = p.id; S.partnerName = p.name;
+  db.lastId = p.id;
+  if(!save(db)) return false;
+  S.saved = true;
+  return true;
+}
+
+/* ══════════════ 状态 ══════════════ */
+var S = {
+  view: "home",
+  aText: "", bText: "",
+  code: "", pending: null,     /* A 端：已封好的信封 */
+  hashToken: "", unlockKind: "",
+  report: null,                /* 当前报告 */
+  role: "",                    /* a=收到回信的人, b=第二轮书写的人 */
+  partnerId: null, partnerName: "", rel: "unknown",
+  envDate: "",          /* 这一次测试的日期，跟着信封走：两端永远是同一天 */
+  openPartner: null,
+  backView: "",                /* 去档案前待在哪个页面，回来时还原 */
+  detailPid: null,             /* 档案详情：正在看谁 */
+  shareQuotes: true,           /* 分享卡片：要不要印上两个人的原话 */
+  openTier: "",                /* 谱系里展开了哪个等级 */
+  shareFrom: "report", shareURL: "",
+  err: "",
+  saved: false, sentBack: false
+};
+var app = document.getElementById("app");
+
+/* ── 会话存档：刷新、切后台、锁屏回来都不丢进度 ── */
+function sessSave(){
+  try{
+    localStorage.setItem(KEY + "_sess", JSON.stringify({
+      view: S.view, aText: S.aText, bText: S.bText, code: S.code,
+      hashToken: S.hashToken, role: S.role, backView: S.backView, envDate: S.envDate,
+      partnerId: S.partnerId, partnerName: S.partnerName, rel: S.rel,
+      saved: S.saved, sentBack: S.sentBack,
+      report: S.report ? stripRefs(S.report) : null
+    }));
+  }catch(e){}
+}
+function sessLoad(){
+  try{
+    var s = localStorage.getItem(KEY + "_sess");
+    var o = s ? JSON.parse(s) : null;
+    return (o && typeof o === "object") ? o : null;
+  }catch(e){ return null; }
+}
+function sessClear(){ try{ localStorage.removeItem(KEY + "_sess"); }catch(e){} }
+function sessApply(o){
+  if(!o) return false;
+  S.aText = o.aText || ""; S.bText = o.bText || "";
+  S.code = o.code || ""; S.hashToken = o.hashToken || "";
+  S.role = o.role || ""; S.backView = o.backView || "";
+  S.partnerId = o.partnerId || null; S.partnerName = o.partnerName || "";
+  S.rel = o.rel || "unknown"; S.saved = !!o.saved; S.sentBack = !!o.sentBack;
+  S.envDate = o.envDate || "";
+  S.report = o.report || null;
+  var v = o.view || "home";
+  if(v === "pdetail" || v === "share") v = "archive";
+  if(v === "archive" && S.backView) v = S.backView;
+  if(v === "report" || v === "oldReport"){
+    if(!S.report) return false;
+    S.view = "report";
+  } else if(v === "envelope"){
+    if(!S.pending) return false;
+    S.view = "envelope";
+  } else if(v === "writeB"){
+    S.view = "writeB";
+  } else if(v === "writeA" || v === "broken" || v === "home" || v === "spec"){
+    S.view = v;
+  } else S.view = "home";
+  return true;
+}
+
+/* ══════════════ 视图 ══════════════ */
+function stepBar(n){
+  var u = ["① 你写", "② TA 写", "③ 拆开"];
+  return '<div class="stepbar">' + u.map(function(x, i){
+    return (i > 0 ? '<i class="' + (i <= n ? "on" : "") + '"></i>' : "") +
+           '<u class="' + (i <= n ? "on" : "") + '">' + x + '</u>';
+  }).join("") + '</div>';
+}
+function threeSteps(){
+  return '<div class="three">' +
+    '<div class="st"><b>1</b><span>你写一句</span></div>' +
+    '<div class="arw">›</div>' +
+    '<div class="st"><b>2</b><span>把链接发给 TA<br>TA 也写一句</span></div>' +
+    '<div class="arw">›</div>' +
+    '<div class="st"><b>3</b><span>一起拆开<br>看报告</span></div>' +
+  '</div>';
+}
+
+function viewHome(){
+  var db = load();
+  var h = '<div class="oneline">' +
+    '<p>两个人，各写一句话，谁也不许看谁的。<br>写完一起拆。</p>' +
+    '<span>不用装 App，也不用联网</span>' +
+  '</div>' + threeSteps();
+
+  h += '<button class="btn red" data-act="toA">开 始</button>';
+
+  if(db.partners.length){
+    h += '<div class="card" style="margin-top:14px">' +
+      '<div class="ctitle">以 前 测 过 的<em>点一下直接开始</em></div>' +
+      '<div class="pchips">' +
+      db.partners.map(function(p){
+        var n = Object.keys(p.records || {}).length;
+        return '<div class="pchip" data-act="pickP" data-id="' + p.id + '">' + esc(p.name) +
+          '<span style="font-size:10px;opacity:.6">' + n + ' 次</span></div>';
+      }).join("") +
+      '</div></div>';
+  }
+  h += '<div class="card" style="margin-top:14px">' +
+    '<div class="ctitle">六 个 等 级<em>测出过几个，就亮几个</em></div>' +
+    '<div class="tgrid" style="margin-top:2px">' +
+      TIERS.map(function(t){
+        var got = !!seenTiers()[t.code];
+        return '<div class="tg' + (got ? ' on' : ' lock') + '" data-act="openSpec">' +
+          tierArt(t) +
+          '<div class="tc">' + (got ? t.code : "??") + '</div>' +
+          '<div class="tn">' + (got ? t.name : "未 检 出") + '</div>' +
+        '</div>';
+      }).join("") +
+    '</div>' +
+    '<button class="morelink" data-act="openSpec">看 完 整 谱 系 ›</button>' +
+  '</div>';
+  return h;
+}
+
+/* 选了人，报告出来就会自动进他/她的档案，不用再手动存 */
+function pickRow(){
+  var db = load();
+  if(!db.partners.length) return "";
+  return '<div class="whorow">' +
+    '<label class="flabel">这次是跟谁（选了会自动存档）</label>' +
+    '<div class="pchips">' +
+      db.partners.map(function(p){
+        return '<div class="pchip' + (p.id === S.partnerId ? " on" : "") + '" data-act="pickHere" data-id="' + p.id + '">' + esc(p.name) + '</div>';
+      }).join("") +
+      '<div class="pchip' + (S.partnerId ? "" : " on") + '" data-act="pickHere" data-id="">不 指 定</div>' +
+    '</div></div>';
+}
+
+function viewWriteA(){
+  return '<div class="card">' +
+    '<div class="ctitle">第 一 步 · 你 先 写<em>' + md(todayKey()) + '</em></div>' +
+    stepBar(0) +
+    pickRow() +
+    '<div class="field">' +
+      '<label class="flabel">今天你想对 TA 说的一句话</label>' +
+      '<textarea id="txt" rows="4" maxlength="80" placeholder="比如：今天中午那碗面太咸了"></textarea>' +
+    '</div>' +
+    '<div class="tip">写完就<b>封进信封</b>，谁也改不了，包括你自己。<br>TA 那边只能看到你写了几个字，看不到内容。</div>' +
+    (isLocal() ? '<div class="warn"><b>提示：</b>你现在打开的是本机文件，生成的链接<b>发不出去</b>。要先从网页版地址打开，才能发给 TA。</div>' : '') +
+    '<button class="btn" data-act="sealA">写 好 了，封 起 来</button>' +
+    '<button class="btn ghost" style="margin-top:9px" data-act="home">先 不 玩 了</button>' +
+  '</div>';
+}
+
+function isLocal(){
+  try{ return location.protocol === "file:" || location.href.indexOf("http") !== 0; }catch(e){ return false; }
+}
+function localWarn(){
+  if(!isLocal()) return "";
+  return '<div class="warn">' +
+    '<b>这条链接发不出去。</b><br>' +
+    '你现在打开的是本机文件，链接只在自己手机上有用，别人点开是空白。<br>' +
+    '请用<b>网页版地址</b>打开本页，再重新写一次、重新生成信封。' +
+    (WEB ? '<br><a class="go" href="' + WEB + '">去 网 页 版</a>' : '') +
+  '</div>';
+}
+function viewEnvelope(){
+  var url = S.pending ? S.pending.url : "";
+  var n = chars((S.aText || "").replace(/\s/g, "")).length;
+  return '<div class="card">' +
+    '<div class="ctitle">信 封 已 封 好<em>第 二 步</em></div>' +
+    localWarn() +
+    stepBar(1) +
+    '<div class="codebox">' +
+      '<div class="lb">已 封 存</div>' +
+      '<div class="num">' + n + '</div>' +
+      '<div class="sub">个字，封在这条链接里<br>TA 只看得到这个数</div>' +
+    '</div>' +
+    '<div class="linkbox">' +
+      '<input type="text" id="surl" readonly value="' + esc(url) + '">' +
+      '<button data-act="copyLink">复制</button>' +
+    '</div>' +
+    '<div class="tip">把链接发给 TA，<b>TA 点开直接就能写</b>，不用输密码。<br>你写的那句话在链接里是加密的，TA 拆开之前看不到。</div>' +
+    '<button class="btn" data-act="nearby">TA 就 在 旁 边，直 接 让 TA 写</button>' +
+    '<button class="btn ghost" style="margin-top:9px" data-act="home">回 首 页</button>' +
+  '</div>';
+}
+
+function viewBroken(){
+  return '<div class="card"><div class="unlockbox">' +
+    '<div class="ic">\u2709</div>' +
+    '<div class="t">这条链接不完整</div>' +
+    '<div class="s">可能是转发时被截断了，也可能是旧版本生成的。<br>让 TA 重新写一句、重新发一次。</div>' +
+    '<button class="btn red" data-act="clearHash">回 首 页</button>' +
+  '</div></div>';
+}
+
+function viewWriteB(){
+  var n = chars(S.aText.replace(/\s/g, "")).length;
+  return '<div class="card">' +
+    '<div class="ctitle">第 二 步 · 轮 到 你 写<em>' + md(todayKey()) + '</em></div>' +
+    stepBar(1) +
+    '<div class="sealed">' +
+      '<span class="lk">\u25A3</span>' +
+      '<div><b>' + (n ? "\u25CF ".repeat(Math.min(n, 18)) : "（空）") + '</b>' +
+      '<span>TA 已经写好了 · ' + n + ' 个字 · 拆开前你看不到</span></div>' +
+    '</div>' +
+    '<div class="field">' +
+      '<label class="flabel">今天你想对 TA 说的一句话</label>' +
+      '<textarea id="txt" rows="4" maxlength="80" placeholder="比如：我也是，下次换一家"></textarea>' +
+    '</div>' +
+    '<div class="tip">不许问 TA 写了什么。<br>你写完，两份就<b>同时拆开</b>。</div>' +
+    '<button class="btn red" data-act="sealB">写 好 了，拆 开 看 看</button>' +
+  '</div>';
+}
+
+function viewSaveBar(){
+  if(S.saved) return '<div class="saverow"><div class="done">已存进 <b>' + esc(S.partnerName || "档案") + '</b> 的档案</div></div>';
+  var db = load();
+  var chips = db.partners.length
+    ? '<div class="pchips saveto">' + db.partners.map(function(p){
+        return '<div class="pchip" data-act="saveTo" data-id="' + p.id + '">' + esc(p.name) + '</div>';
+      }).join("") + '</div>'
+    : "";
+  return '<div class="saverow">' +
+    '<div class="st">' + (chips ? "存到谁的档案？（点名字就行，也可以下面新起一个）" : "存进档案吗？（可以不存）") + '</div>' +
+    chips +
+    '<input type="text" id="pname" maxlength="12" placeholder="TA 叫什么？真名外号都行，可以瞎起">' +
+    '<div class="rel" id="relBox">' +
+      RELS.map(function(r){
+        return '<span data-act="pickRel" data-rel="' + r.k + '"' + (S.rel === r.k ? ' class="on"' : '') + '>' + r.n + '</span>';
+      }).join("") +
+    '</div>' +
+    '<button class="btn" data-act="doSave">存 一 下</button>' +
+  '</div>';
+}
+
+function renderReportCard(r){
+  var st = scoreText(r.score);
+  var tt = tierByCode(r.tier) || tierOf(r.score);
+  var cls = st.length > 5 ? "bignum long" : (st.length > 4 ? "bignum mid" : "bignum");
+  var pos = clamp(r.score, 2, 98);
+  var liveDims = r.dims.filter(function(d){ return !d.weak; });
+  if(!liveDims.length) liveDims = r.dims.slice();
+  var dimsHTML = r.dims.map(function(d){
+    var lvCls = d.weak ? "" : (d.v >= 86 ? "hi" : (d.v < 76 ? "lo" : ""));
+    return '<div class="dim">' +
+      '<div class="top"><span class="dn">' + d.q + '</span>' +
+      '<span class="lv ' + lvCls + '">' + d.lv + '</span></div>' +
+      '<div class="db"><i style="width:' + clamp(d.v, 3, 100) + '%"></i></div>' +
+      '<div class="note">' + esc(d.note) + '</div>' +
+      '<div class="term">' + d.term + '　' + (d.weak ? "没测" : scoreText(d.v)) + '</div>' +
+    '</div>';
+  }).join("");
+
+  var qBlock = function(lab, who, txt, extra){
+    return '<div class="qt ' + (extra || "") + '">' +
+      '<div class="lab"><span>' + lab + '</span><u>' + esc(who) + '</u></div>' +
+      (String(txt).trim() ? '<p>' + esc(txt) + '</p>' : '<p class="none">这个人一个字都没写</p>') +
+    '</div>';
+  };
+
+  return '<div class="report pop">' +
+    '<div class="topband"></div>' +
+    '<div class="head"><div class="no">' + esc(r.no) + '<br>' + md(r.date) + '</div>' +
+      '<div class="stamp">已 鉴 定</div></div>' +
+    '<div class="quotes">' +
+      (S.role === "b"
+        ? qBlock("TA 写 的", "TA", r.a, "unfold") + qBlock("你 写 的", "你", r.b, "unfold d2")
+        : qBlock("你 写 的", "你", r.a, "unfold") + qBlock("TA 写 的", "TA", r.b, "unfold d2")) +
+    '</div>' +
+    '<div class="scorezone">' +
+      '<div class="label">默 契 指 数</div>' +
+      '<div class="' + cls + '">' + scoreText(r.score) + '</div>' +
+      '<div class="unit">满 分 100</div>' +
+      '<div class="scalebar"><span style="left:calc(' + pos + '% - 5.5px)"></span></div>' +
+    '</div>' +
+    '<div class="tierbadge">' + tierArt(tt) + '<b>' + tt.code + '</b><span>' + tt.name + '</span></div>' +
+    '<div class="verdict"><p>' + esc(r.verdict) + '</p></div>' +
+    '<div class="dims"><div class="dimsh">我 们 比 了 三 件 事</div>' + dimsHTML + '</div>' +
+    '<div class="sum">' +
+      '<div class="nums">' + (liveDims.length === 3 ? "三项" : "两项") + '的分数：<b>' +
+        liveDims.map(function(d){ return scoreText(d.v); }).join("</b> · <b>") + '</b></div>' +
+      '<div class="fin">合起来 —— <b>' + scoreText(r.score) + '</b></div>' +
+      '<div class="why">' + esc(r.why) + '</div>' +
+    '</div>' +
+    '<div class="basis"><h4>还 注 意 到</h4><ul>' +
+      r.basis.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") +
+    '</ul></div>' +
+    viewSaveBar() +
+    '<div class="acts">' +
+      '<button class="btn" data-act="share">生 成 分 享 卡 片</button>' +
+    '</div>' +
+    '<div class="acts">' +
+      (S.role === "a" ? "" :
+        '<button class="btn red" data-act="sendBack">' + (S.sentBack ? "再 复 制 一 次 链 接" : "把 报 告 寄 回 给 TA") + '</button>' +
+        (S.sentBack ? '<div class="tip" style="margin-top:-4px">链接发出去了。<b>TA 点开就能看到这份报告</b>，不用输密码。</div>' : '')) +
+      '<button class="btn ghost" data-act="copy">复 制</button>' +
+      '<button class="btn ghost" data-act="restart">换 个 人 再 测</button>' +
+    '</div>' +
+    tierSpec(tt.code) +
+  '</div>';
+}
+
+/* 报告最下方：六个等级全陈列，测出过的亮着，没测出的留剪影 */
+function tierSpec(cur){
+  var seen = seenTiers();
+  var cells = TIERS.map(function(t){
+    var got = !!seen[t.code];
+    var isCur = (t.code === cur);
+    return '<div class="tg' + (got ? ' on' : ' lock') + '" data-act="tier" data-code="' + t.code + '">' +
+      (isCur ? '<div class="flag">本 次</div>' : '') +
+      tierArt(t) +
+      '<div class="tc">' + (got ? t.code : "??") + '</div>' +
+      '<div class="tn">' + (got ? t.name : "未 检 出") + '</div>' +
+      '<div class="tr">' + t.min + "–" + t.max + '</div>' +
+    '</div>';
+  }).join("");
+  var info = "";
+  var ot = S.openTier ? tierByCode(S.openTier) : null;
+  if(ot){
+    var got = !!seen[ot.code];
+    info = '<div class="tinfo' + (got ? '' : ' lock') + '">' +
+      '<div class="th">' + tierArt(ot) +
+        '<span>' + (got ? ot.name : "等 级 未 知") + '</span>' +
+        '<em>' + (got ? ot.code : "??") + ' · ' + ot.min + "–" + ot.max + '</em></div>' +
+      '<p>' + (got
+        ? esc(ot.one) + '　' + esc(pick(ot.pool, 0))
+        : "这个等级你还没开出过。换个人再测一次，或者换个话题，看看会不会落在这里。") + '</p>' +
+    '</div>';
+  }
+  var gotN = 0;
+  for(var i = 0; i < TIERS.length; i++) if(seen[TIERS[i].code]) gotN++;
+  return '<div class="spec">' +
+    '<h4>关 系 谱 系</h4>' +
+    '<div class="ssub">六个等级 · 已开出 ' + gotN + ' / 6 · 点开看说法</div>' +
+    '<div class="tgrid">' + cells + '</div>' +
+    info +
+    '<div class="shint">灰着的是这台机器上还没测出过的。<br>换个人、换天、换个话题，总会撞上一个。</div>' +
+  '</div>';
+}
+
+function viewSpec(){
+  return '<div class="card">' +
+    '<div class="ctitle">关 系 谱 系<em>六个等级，全在这儿</em></div>' +
+    tierSpec(S.report ? (S.report.tier || tierOf(S.report.score).code) : "") +
+    '<div class="acts"><button class="btn ghost" data-act="home">回 去</button></div>' +
+  '</div>';
+}
+function viewArchive(){
+  var db = load();
+  var seenN = Object.keys(seenTiers()).length;
+  var head = '<div class="card" style="margin-bottom:12px">' +
+    '<div class="ctitle">关 系 谱 系<em>已开出 ' + seenN + ' / 6</em></div>' +
+    '<button class="morelink" data-act="openSpec">点 开 看 六 个 等 级 ›</button>' +
+  '</div>';
+  if(!db.partners.length){
+    return head + '<div class="card"><div class="empty"><span class="em">\u25A4</span>档案是空的<br>出一份报告、存一下，这里就有了</div></div>';
+  }
+  return head + db.partners.map(function(p){
+    var recs = p.records || {};
+    var keys = Object.keys(recs).sort().reverse();
+    var open = (S.openPartner === p.id);
+    var avg = keys.length ? keys.reduce(function(s, k){ return s + recs[k].score; }, 0) / keys.length : 0;
+    var rows = keys.map(function(k){
+      var r = recs[k], v = scoreText(r.score);
+      return '<div class="hrow" data-act="viewOld" data-pid="' + p.id + '" data-date="' + k + '">' +
+        '<div class="d">' + recLabel(k) + '</div>' +
+        '<div class="v' + (v.length > 5 ? " long" : "") + '">' + v + '</div>' +
+        '<div class="t">' + esc(r.verdict) + '</div>' +
+      '</div>';
+    }).join("");
+    return '<div class="pcard' + (open ? " open" : "") + '">' +
+      '<div class="ph" data-act="toggleP" data-id="' + p.id + '">' +
+        '<div class="av">' + esc(chars(p.name)[0] || "?") + '</div>' +
+        '<div class="info"><b>' + esc(p.name) + '</b>' +
+        '<span>' + relName(p.relation) + ' · 共 ' + keys.length + ' 份' +
+        (keys.length > 1 ? ' · 平均 ' + avg.toFixed(1) : '') + '</span></div>' +
+        '<div class="arrow">›</div>' +
+      '</div>' +
+      '<div class="body">' +
+        (keys.length ? sparkline(recs) : '') +
+        rows +
+        '<button class="morelink" data-act="openDetail" data-id="' + p.id + '">看 完 整 档 案 ›</button>' +
+        '<button class="del" data-act="delP" data-id="' + p.id + '">删 掉 这 个 人</button>' +
+      '</div>' +
+    '</div>';
+  }).join("");
+}
+
+function sparkline(recs){
+  var keys = Object.keys(recs).sort().slice(-7);
+  if(keys.length < 2) return "";
+  var W = 358, H = 92, P = 8, lo = 0, hi = 100;
+  var pts = keys.map(function(k, i){
+    var v = clamp(recs[k].score, lo, hi);
+    var x = P + i * (W - P * 2) / (keys.length - 1);
+    var y = H - 18 - (v - lo) / (hi - lo) * (H - 34);
+    return [x, y, recs[k].score, k];
+  });
+  var poly = pts.map(function(p){ return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" ");
+  var dots = pts.map(function(p){
+    return '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3.2" fill="#1A1614"/>';
+  }).join("");
+  var labs = pts.map(function(p){
+    return '<text x="' + p[0].toFixed(1) + '" y="' + (H - 3) + '" font-size="8" fill="#9C9088" text-anchor="middle">' +
+      (+p[3].slice(4,6)) + "/" + (+p[3].slice(6,8)) + '</text>';
+  }).join("");
+  var vals = pts.map(function(p){
+    return '<text x="' + p[0].toFixed(1) + '" y="' + (p[1] - 9).toFixed(1) + '" font-size="9" font-weight="700" fill="#1A1614" text-anchor="middle" font-family="Georgia,serif">' +
+      p[2].toFixed(1) + '</text>';
+  }).join("");
+  return '<svg class="spark" viewBox="0 0 ' + W + ' ' + H + '">' +
+    '<line x1="' + P + '" y1="' + (H - 18) + '" x2="' + (W - P) + '" y2="' + (H - 18) + '" stroke="#F0EAE1" stroke-width="1"/>' +
+    '<polyline points="' + poly + '" fill="none" stroke="#1A1614" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>' +
+    dots + labs + vals + '</svg>';
+}
+
+/* ── 档案详情：一个人的完整走势 ── */
+function dayBefore(k){
+  k = String(k).split("#")[0];
+  var y = +k.slice(0,4), m = +k.slice(4,6), d = +k.slice(6,8);
+  var t = new Date(y, m - 1, d);
+  t.setDate(t.getDate() - 1);
+  var mm = t.getMonth() + 1, dd = t.getDate();
+  return String(t.getFullYear()) + (mm < 10 ? "0" : "") + mm + (dd < 10 ? "0" : "") + dd;
+}
+function streakOf(desc){
+  /* 同一天测了多次只算一天 */
+  var days = [], seen = {};
+  for(var j = 0; j < desc.length; j++){
+    var d0 = String(desc[j]).split("#")[0];
+    if(!seen[d0]){ seen[d0] = 1; days.push(d0); }
+  }
+  var n = 1;
+  for(var i = 0; i < days.length - 1; i++){
+    if(dayBefore(days[i]) === days[i + 1]) n++; else break;
+  }
+  return n;
+}
+function bigChart(recs, asc){
+  if(asc.length < 2) return "";
+  var k = asc.slice(-30);
+  var W = 358, H = 138, PL = 30, PR = 12, PT = 18, PB = 24, lo = 0, hi = 100;
+  var X = function(i){ return PL + i * (W - PL - PR) / (k.length - 1); };
+  var Y = function(v){ return PT + (1 - (clamp(v, lo, hi) - lo) / (hi - lo)) * (H - PT - PB); };
+  var pts = k.map(function(d, i){ return [X(i), Y(recs[d].score), recs[d].score, d]; });
+  var poly = pts.map(function(p){ return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" ");
+  var area = "M" + pts[0][0].toFixed(1) + "," + (H - PB) + " L" + poly.split(" ").join(" L") +
+             " L" + pts[pts.length - 1][0].toFixed(1) + "," + (H - PB) + " Z";
+  var grid = [70, 80, 90, 100].map(function(v){
+    return '<line x1="' + PL + '" y1="' + Y(v) + '" x2="' + (W - PR) + '" y2="' + Y(v) +
+      '" stroke="' + (v === 100 ? "#E6DED3" : "#F1EBE3") + '" stroke-width="1"/>' +
+      '<text x="' + (PL - 6) + '" y="' + (Y(v) + 3) + '" font-size="8" fill="#B5A99F" text-anchor="end">' + v + '</text>';
+  }).join("");
+  var dots = pts.map(function(p){
+    return '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3" fill="#1A1614"/>';
+  }).join("");
+  var step = Math.ceil(k.length / 6);
+  var labs = pts.map(function(p, i){
+    if(i % step !== 0 && i !== pts.length - 1) return "";
+    return '<text x="' + p[0].toFixed(1) + '" y="' + (H - 8) + '" font-size="8" fill="#9C9088" text-anchor="middle">' +
+      (+p[3].slice(4,6)) + "/" + (+p[3].slice(6,8)) + '</text>';
+  }).join("");
+  var lastP = pts[pts.length - 1];
+  var mark = '<text x="' + lastP[0].toFixed(1) + '" y="' + (lastP[1] - 10).toFixed(1) +
+    '" font-size="10" font-weight="700" fill="#D0392A" text-anchor="end" font-family="Georgia,serif">' +
+    lastP[2].toFixed(1) + '</text>';
+  return '<svg class="spark big" viewBox="0 0 ' + W + ' ' + H + '">' +
+    grid +
+    '<path d="' + area + '" fill="#E9E1D6" opacity=".55"/>' +
+    '<polyline points="' + poly + '" fill="none" stroke="#1A1614" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>' +
+    dots + labs + mark + '</svg>';
+}
+function viewPDetail(){
+  var db = load();
+  var p = null;
+  for(var i = 0; i < db.partners.length; i++) if(db.partners[i].id === S.detailPid) p = db.partners[i];
+  if(!p){
+    return '<div class="card"><div class="empty">这个人已经不在档案里了</div>' +
+      '<div class="acts"><button class="btn ghost" data-act="toArchive">回 档 案</button></div></div>';
+  }
+  var recs = p.records || {};
+  var asc = Object.keys(recs).sort(), desc = asc.slice().reverse();
+  var n = asc.length;
+  if(!n){
+    return '<div class="card pdet">' +
+      '<div class="ptop"><div class="av">' + esc(chars(p.name)[0] || "?") + '</div>' +
+      '<div class="info"><b>' + esc(p.name) + '</b><span>' + relName(p.relation) + ' · 还没有记录</span></div></div>' +
+      '<div class="empty">还没跟 TA 测过</div>' +
+      '<div class="acts"><button class="btn ghost" data-act="toArchive">回 档 案</button>' +
+      '<button class="btn ghost" data-act="restart">去 测 一 次</button></div></div>';
+  }
+  var sum = asc.reduce(function(s, k){ return s + recs[k].score; }, 0);
+  var avg = sum / n;
+  var hiK = asc.reduce(function(a, k){ return recs[k].score > recs[a].score ? k : a; }, asc[0]);
+  var loK = asc.reduce(function(a, k){ return recs[k].score < recs[a].score ? k : a; }, asc[0]);
+  var last = desc[0], prev = desc[1];
+  var st = streakOf(desc);
+  var span = n > 1 ? Math.round((new Date(+asc[n-1].slice(0,4), +asc[n-1].slice(4,6)-1, +asc[n-1].slice(6,8)) -
+    new Date(+asc[0].slice(0,4), +asc[0].slice(4,6)-1, +asc[0].slice(6,8))) / 86400000) + 1 : 1;
+
+  var trend;
+  if(n === 1){
+    trend = "这是你们的第一份。<b>多测几次</b>才看得出走势。";
+  } else {
+    var dv = recs[last].score - recs[prev].score;
+    trend = "最近一次 <b>" + scoreText(recs[last].score) + "</b>（" + recLabel(last) + "），比上一次" +
+      (Math.abs(dv) < 0.05 ? "没什么变化" : (dv > 0 ? "高 <b>" + dv.toFixed(1) + "</b>" : "低 <b>" + Math.abs(dv).toFixed(1) + "</b>")) +
+      "。<br>从头到尾 " + span + " 天，一共 " + n + " 次。";
+  }
+
+  var stat = function(v, lab, sm){
+    return '<div class="s"><b class="' + (sm ? "sm" : "") + '">' + v + '</b><span>' + lab + '</span></div>';
+  };
+
+  return '<div class="card pdet">' +
+    '<div class="ptop">' +
+      '<div class="av">' + esc(chars(p.name)[0] || "?") + '</div>' +
+      '<div class="info"><b>' + esc(p.name) + '</b>' +
+      '<span>' + relName(p.relation) + ' · 从 ' + md(asc[0]) + ' 开始</span></div>' +
+    '</div>' +
+    '<div class="statgrid">' +
+      stat(scoreText(avg), "平 均 分") +
+      stat(n, "一 共 几 次") +
+      stat(st + " 天", st > 1 ? "连 着 测 了" : "最 近 一 次", true) +
+      stat(scoreText(recs[hiK].score), "最 高 " + recLabel(hiK)) +
+      stat(scoreText(recs[loK].score), "最 低 " + recLabel(loK)) +
+      stat((recs[hiK].score - recs[loK].score).toFixed(1), "最 大 起 伏") +
+    '</div>' +
+    '<div class="trend">' + trend + '</div>' +
+    (n > 1 ? '<div class="sech">分 数 走 势</div><div style="margin:0 16px">' + bigChart(recs, asc) + '</div>' : '') +
+    '<div class="sech">每 一 次</div>' +
+    '<div class="hrows">' + desc.map(function(k){
+      var r = recs[k], v = scoreText(r.score);
+      return '<div class="hrow" data-act="viewOld" data-pid="' + p.id + '" data-date="' + k + '">' +
+        '<div class="d">' + recLabel(k) + '</div>' +
+        '<div class="v' + (v.length > 5 ? " long" : "") + '">' + v + '</div>' +
+        '<div class="t">' + esc(r.verdict) + '</div>' +
+      '</div>';
+    }).join("") + '</div>' +
+    '<div style="padding:0 16px 16px">' +
+      '<button class="morelink" data-act="toArchive">返 回 档 案</button>' +
+      '<button class="del" style="margin-top:12px;display:block;margin-left:auto;margin-right:auto" data-act="delP" data-id="' + p.id + '">删 掉 这 个 人</button>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ══════════════ 分享卡片（canvas 画，纯前端） ══════════════ */
+var F_SANS = '"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",Helvetica,Arial,sans-serif';
+var F_SERIF = 'Georgia,"Times New Roman",serif';
+function wrapLines(ctx, text, maxW){
+  var out = [], line = "";
+  text = String(text || "");
+  for(var i = 0; i < text.length; i++){
+    var ch = text.charAt(i);
+    if(ch === "\n"){ out.push(line); line = ""; continue; }
+    if(line && ctx.measureText(line + ch).width > maxW){ out.push(line); line = ch; }
+    else line += ch;
+  }
+  if(line) out.push(line);
+  return out;
+}
+function spWidth(ctx, text, sp){
+  var w = 0;
+  for(var i = 0; i < text.length; i++) w += ctx.measureText(text.charAt(i)).width + sp;
+  return w - sp;
+}
+function spText(ctx, text, x, y, sp, align){
+  var w = spWidth(ctx, text, sp);
+  var cx = (align === "center") ? x - w / 2 : (align === "right" ? x - w : x);
+  for(var i = 0; i < text.length; i++){
+    var ch = text.charAt(i);
+    ctx.fillText(ch, cx, y);
+    cx += ctx.measureText(ch).width + sp;
+  }
+  return w;
+}
+function drawQR(ctx, x, y, size){
+  var n = QRN, m = size / n;
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillRect(x, y, size, size);
+  ctx.fillStyle = "#1A1614";
+  for(var r = 0; r < n; r++){
+    for(var c = 0; c < n; c++){
+      if(QR.charAt(r * n + c) === "1") ctx.fillRect(x + c * m, y + r * m, m + 0.6, m + 0.6);
+    }
+  }
+}
+function cardDims(r, withQ){
+  /* 结论按字数估行数；两句话各最多印 2 行（超出会截断） */
+  var vlines = Math.max(1, Math.ceil(String(r.verdict || "").length / 30));
+  var qh = 0;
+  if(withQ){
+    var ql = function(s){
+      var t = String(s || "").trim();
+      return Math.min(2, Math.max(1, Math.ceil(t.length / 40)));
+    };
+    qh = (18 + ql(r.a) * 21 + 12) + (18 + ql(r.b) * 21 + 12) + 8;
+  }
+  return { W: 660, H: 748 + (vlines - 1) * 27 + qh };
+}
+/* 分享卡片上画等级图案（画布版，坐标沿用 48 网格） */
+function drawGlyph(ctx, code, cx, cy, sz){
+  var k = sz / 48;
+  var X = function(v){ return cx + (v - 24) * k; };
+  var Y = function(v){ return cy + (v - 24) * k; };
+  ctx.save();
+  ctx.strokeStyle = "#D0392A"; ctx.fillStyle = "#D0392A";
+  ctx.lineWidth = 1.7 * k; ctx.lineCap = "round"; ctx.lineJoin = "round";
+  if(code === "MR"){
+    ctx.beginPath();
+    ctx.moveTo(X(18), Y(11)); ctx.lineTo(X(11), Y(11));
+    ctx.quadraticCurveTo(X(8), Y(11), X(8), Y(14)); ctx.lineTo(X(8), Y(34));
+    ctx.quadraticCurveTo(X(8), Y(37), X(11), Y(37)); ctx.lineTo(X(18), Y(37));
+    ctx.moveTo(X(30), Y(11)); ctx.lineTo(X(37), Y(11));
+    ctx.quadraticCurveTo(X(40), Y(11), X(40), Y(14)); ctx.lineTo(X(40), Y(34));
+    ctx.quadraticCurveTo(X(40), Y(37), X(37), Y(37)); ctx.lineTo(X(30), Y(37));
+    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(X(24), Y(8)); ctx.lineTo(X(24), Y(40)); ctx.stroke();
+  } else if(code === "EC"){
+    ctx.beginPath(); ctx.arc(X(12), Y(24), 2.2 * k, 0, Math.PI * 2); ctx.fill();
+    var ar = [[20, 16, 32], [27, 12, 36], [34, 9, 39]];
+    for(var i = 0; i < ar.length; i++){
+      ctx.beginPath();
+      ctx.moveTo(X(ar[i][0]), Y(ar[i][1]));
+      ctx.quadraticCurveTo(X(ar[i][0] + 11), Y(24), X(ar[i][0]), Y(ar[i][2]));
+      ctx.stroke();
+    }
+  } else if(code === "PL"){
+    ctx.beginPath(); ctx.moveTo(X(8), Y(18)); ctx.lineTo(X(40), Y(18)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(X(8), Y(30)); ctx.lineTo(X(40), Y(30)); ctx.stroke();
+    ctx.beginPath(); ctx.arc(X(20), Y(18), 2.2 * k, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(X(28), Y(30), 2.2 * k, 0, Math.PI * 2); ctx.fill();
+  } else if(code === "DF"){
+    ctx.save(); ctx.setLineDash([3 * k, 3 * k]);
+    ctx.beginPath(); ctx.moveTo(X(8), Y(34)); ctx.lineTo(X(40), Y(34)); ctx.stroke(); ctx.restore();
+    ctx.beginPath(); ctx.moveTo(X(8), Y(34)); ctx.lineTo(X(38), Y(13)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(X(18), Y(34)); ctx.quadraticCurveTo(X(18), Y(26), X(26.6), Y(29)); ctx.stroke();
+  } else if(code === "ST"){
+    ctx.beginPath();
+    ctx.moveTo(X(6), Y(24)); ctx.lineTo(X(12), Y(13)); ctx.lineTo(X(18), Y(33));
+    ctx.lineTo(X(24), Y(11)); ctx.lineTo(X(30), Y(35)); ctx.lineTo(X(36), Y(18)); ctx.lineTo(X(42), Y(24));
+    ctx.stroke();
+  } else {
+    ctx.beginPath(); ctx.arc(X(24), Y(24), 14 * k, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(X(16), Y(24)); ctx.lineTo(X(22), Y(24)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(X(26), Y(24)); ctx.lineTo(X(32), Y(24)); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawCard(ctx, r, withQ){
+  var D = cardDims(r, withQ), W = D.W, y = 0, M = 46;
+  ctx.clearRect(0, 0, W, D.H);
+  ctx.fillStyle = "#F2EEE8";
+  ctx.fillRect(0, 0, W, D.H);
+  ctx.fillStyle = "#1A1614";
+  ctx.textBaseline = "alphabetic";
+
+  /* 抬头 */
+  ctx.font = '700 19px ' + F_SANS;
+  spText(ctx, "关 系 鉴 定 科", M, 54, 4);
+  ctx.font = '11px ' + F_SANS;
+  ctx.fillStyle = "#9C9088";
+  ctx.textAlign = "left";
+  ctx.fillText(r.no + "  ·  " + md(r.date), M, 78);
+
+  /* 红色印章 */
+  ctx.save();
+  ctx.translate(W - M - 52, 46);
+  ctx.rotate(-0.13);
+  ctx.strokeStyle = "#D0392A"; ctx.lineWidth = 2.2;
+  ctx.strokeRect(-44, -22, 88, 44);
+  ctx.fillStyle = "#D0392A"; ctx.font = '700 15px ' + F_SANS;
+  spText(ctx, "已 鉴 定", 0, 6, 3, "center");
+  ctx.restore();
+
+  /* 分数 */
+  y = 150;
+  ctx.fillStyle = "#9C9088"; ctx.font = '10.5px ' + F_SANS;
+  spText(ctx, "默 契 指 数", W / 2, y, 3, "center");
+  var st = scoreText(r.score);
+  ctx.fillStyle = "#1A1614";
+  ctx.font = '700 ' + (st.length > 5 ? 58 : (st.length > 4 ? 68 : 84)) + 'px ' + F_SERIF;
+  ctx.textAlign = "center";
+  ctx.fillText(st, W / 2, y + (st.length > 5 ? 78 : 86));
+  ctx.font = '11px ' + F_SANS; ctx.fillStyle = "#9C9088";
+  ctx.fillText("满 分 100", W / 2, y + 108);
+
+  /* 刻度条 */
+  var bx = M + 40, bw = W - (M + 40) * 2, by = y + 132;
+  ctx.strokeStyle = "#DCD3C7"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + bw, by); ctx.stroke();
+  var pos = clamp(r.score / 100, 0, 1);
+  ctx.fillStyle = "#D0392A";
+  ctx.beginPath(); ctx.arc(bx + bw * pos, by, 5.5, 0, Math.PI * 2); ctx.fill();
+
+  /* 等级 */
+  var tt2 = tierByCode(r.tier) || tierOf(r.score);
+  drawGlyph(ctx, tt2.code, W / 2 - 52, by + 30, 22);
+  ctx.fillStyle = "#D0392A"; ctx.font = '700 14px ' + F_SANS; ctx.textAlign = "left";
+  spText(ctx, tt2.code + "　" + tt2.name, W / 2 - 37, by + 37, 2);
+
+  /* 结论 */
+  y = by + 68;
+  ctx.fillStyle = "#1A1614"; ctx.font = '16px ' + F_SANS;
+  var vl = wrapLines(ctx, r.verdict, W - M * 2);
+  for(var i = 0; i < vl.length; i++){
+    ctx.fillText(vl[i], W / 2, y + i * 27);
+  }
+  y += vl.length * 27 + 16;
+
+  /* 两句话 */
+  if(withQ){
+    var pair = [["你 写 的", r.a], ["TA 写 的", r.b]];
+    for(var pi = 0; pi < 2; pi++){
+      var lab = pair[pi][0], txt = String(pair[pi][1] || "").trim() || "（这个人一个字都没写）";
+      ctx.fillStyle = "#9C9088"; ctx.font = '10px ' + F_SANS; ctx.textAlign = "left";
+      spText(ctx, lab, M, y + 2, 2);
+      ctx.font = '14px ' + F_SANS; ctx.fillStyle = "#3A3330";
+      var lines = wrapLines(ctx, txt, W - M * 2 - 8);
+      if(lines.length > 2){ lines = lines.slice(0, 2); lines[1] = lines[1].slice(0, -1) + "…"; }
+      for(var li = 0; li < lines.length; li++){
+        ctx.fillText(lines[li], M + 2, y + 24 + li * 21);
+      }
+      ctx.strokeStyle = "#E3DCD2"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(M, y + 10); ctx.lineTo(W - M, y + 10); ctx.stroke();
+      y += 18 + lines.length * 21 + 12;
+    }
+    y += 8;
+  }
+
+  /* 三项 */
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#9C9088"; ctx.font = '10px ' + F_SANS;
+  spText(ctx, "我 们 比 了 三 件 事", M, y + 12, 3);
+  y += 28;
+  for(var di = 0; di < r.dims.length; di++){
+    var d = r.dims[di];
+    ctx.fillStyle = "#1A1614"; ctx.font = '13px ' + F_SANS;
+    ctx.fillText(d.q, M, y + 14);
+    ctx.textAlign = "right";
+    ctx.fillStyle = d.weak ? "#B5A99F" : (d.v >= 86 ? "#D0392A" : "#3A3330");
+    ctx.font = '700 13px ' + F_SANS;
+    ctx.fillText(d.weak ? "没测" : d.lv + "  " + scoreText(d.v), W - M, y + 14);
+    ctx.textAlign = "left";
+    /* 条 */
+    var ty = y + 24, tw = W - M * 2;
+    ctx.fillStyle = "#E6DED3";
+    ctx.fillRect(M, ty, tw, 3);
+    if(!d.weak){
+      ctx.fillStyle = d.v >= 86 ? "#D0392A" : "#1A1614";
+      ctx.fillRect(M, ty, Math.max(6, tw * clamp(d.v / 100, 0, 1)), 3);
+    }
+    y += 52;
+  }
+
+  /* 页脚：二维码 */
+  var fy = D.H - 118;
+  ctx.strokeStyle = "#E3DCD2"; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(M, fy - 18); ctx.lineTo(W - M, fy - 18); ctx.stroke();
+  var qs = 92;
+  drawQR(ctx, M, fy, qs);
+  ctx.fillStyle = "#1A1614"; ctx.font = '700 14px ' + F_SANS;
+  ctx.fillText("扫一扫，你也来测", M + qs + 18, fy + 30);
+  ctx.fillStyle = "#3A3330"; ctx.font = '11.5px ' + F_SANS;
+  ctx.fillText("两个人，各写一句，", M + qs + 18, fy + 52);
+  ctx.fillText("谁也不许看谁的", M + qs + 18, fy + 70);
+  ctx.fillStyle = "#B5A99F"; ctx.font = '10px ' + F_SANS;
+  ctx.fillText(WEB.replace(/^https?:\/\//, "").replace(/\/$/, ""), M + qs + 18, fy + 90);
+  return D.H;
+}
+function viewShare(){
+  var r = S.report;
+  if(!r) return '<div class="card"><div class="empty">没有可分享的报告</div>' +
+    '<div class="acts"><button class="btn ghost" data-act="backReport">回 报 告</button></div></div>';
+  return '<div class="card">' +
+    '<div class="ctitle">分 享 卡 片<em>存 图 发 出 去</em></div>' +
+    '<div class="chiprow">' +
+      '<span data-act="qToggle" data-v="1" class="' + (S.shareQuotes ? "on" : "") + '">印 上 原 话</span>' +
+      '<span data-act="qToggle" data-v="0" class="' + (S.shareQuotes ? "" : "on") + '">只 印 分 数</span>' +
+    '</div>' +
+    '<div class="sharebox"><img id="shareImg" alt="关系鉴定科报告卡片"></div>' +
+    '<div class="sharetip">' + (S.shareQuotes
+      ? "卡片上会有你们俩写的原话。不想让别人看到，就切「只印分数」。"
+      : "卡片上只有分数和结论，两句原话不会印上去。") + '</div>' +
+    '<div class="acts">' +
+      '<button class="btn red" data-act="saveImg">保 存 图 片</button>' +
+      '<button class="btn ghost" data-act="backReport">回 报 告</button>' +
+    '</div>' +
+    '<div class="sharetip" style="margin-top:-4px">手机上如果点了没反应，就<b>长按上面的图片</b>保存。</div>' +
+  '</div>';
+}
+function paintShare(){
+  var img = document.getElementById("shareImg");
+  if(!img || !S.report) return;
+  try{
+    var D = cardDims(S.report, S.shareQuotes);
+    var cv = document.createElement("canvas");
+    var sc = 2;
+    cv.width = D.W * sc; cv.height = D.H * sc;
+    var ctx = cv.getContext("2d");
+    if(!ctx){ img.parentNode.innerHTML = '<div class="ph">这个浏览器画不了卡片</div>'; return; }
+    ctx.scale(sc, sc);
+    drawCard(ctx, S.report, S.shareQuotes);
+    S.shareURL = cv.toDataURL("image/png");
+    img.src = S.shareURL;
+  }catch(e){
+    if(img.parentNode) img.parentNode.innerHTML = '<div class="ph">画卡片时出了点问题</div>';
+  }
+}
+
+/* ══════════════ 渲染 ══════════════ */
+function render(){
+  var tab = document.getElementById("tabToday"), tab2 = document.getElementById("tabArc");
+  var arc = (S.view === "archive" || S.view === "spec");
+  tab.className = arc ? "" : "on";
+  tab2.className = arc ? "on" : "";
+
+  var html = "";
+  if(S.view === "home") html = viewHome();
+  else if(S.view === "writeA") html = viewWriteA();
+  else if(S.view === "envelope") html = viewEnvelope();
+  else if(S.view === "broken") html = viewBroken();
+  else if(S.view === "writeB") html = viewWriteB();
+  else if(S.view === "report" || S.view === "oldReport") html = renderReportCard(S.report);
+  else if(S.view === "share") html = viewShare();
+  else if(S.view === "archive") html = viewArchive();
+  else if(S.view === "spec") html = viewSpec();
+  else if(S.view === "pdetail") html = viewPDetail();
+
+  app.innerHTML = html;
+  app.classList.remove("fadein");
+  void app.offsetWidth;
+  app.classList.add("fadein");
+
+  if(S.view === "writeA" || S.view === "writeB"){
+    var ta = document.getElementById("txt");
+    if(ta) setTimeout(function(){ ta.focus(); }, 60);
+  }
+  if((S.view === "writeA" && S.aText) || (S.view === "writeB" && S.bText)){
+    var t2 = document.getElementById("txt");
+    if(t2) t2.value = (S.view === "writeA") ? S.aText : S.bText;
+  }
+  if(S.view === "share") paintShare();
+  sessSave();
+}
+
+/* ══════════════ 行为 ══════════════ */
+var toastEl = document.getElementById("toast"), toastTimer;
+function toast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add("on");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ toastEl.classList.remove("on"); }, 2400);
+}
+function copyText(txt, ok){
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(txt).then(function(){ toast(ok); }, function(){ fallbackCopy(txt, ok); });
+  } else { fallbackCopy(txt, ok); }
+}
+function fallbackCopy(txt, ok){
+  var ta = document.createElement("textarea");
+  ta.value = txt;
+  ta.style.position = "fixed"; ta.style.left = "-9999px";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); toast(ok); }
+  catch(e){ toast("复制失败，长按截图也行"); }
+  document.body.removeChild(ta);
+}
+
+function makeEnvelope(){
+  var payload = { a: S.aText, d: todayKey(), n: S.partnerName || "", rel: S.rel || "unknown", pid: S.partnerId || "" };
+  S.envDate = payload.d;
+  sessSave();
+  var pk = packURL("e", JSON.stringify(payload));
+  S.code = pk.secret;
+  S.pending = { token: pk.token, code: pk.secret, url: pk.url, payload: payload };
+  try{ localStorage.setItem(KEY + "_pending", JSON.stringify(S.pending)); }catch(e){}
+}
+
+/* 这一次测试属于哪一天：以信封上的日期为准，两端拿到的一定是同一个 */
+function testDate(){
+  if(S.envDate) return S.envDate;
+  if(S.pending && S.pending.payload && S.pending.payload.d) return S.pending.payload.d;
+  return todayKey();
+}
+function buildReport(){
+  var r = appraise(S.aText, S.bText, testDate(), S.partnerId || "", S.rel || "unknown");
+  S.report = r;
+  S.role = "b";
+  S.view = "report";
+  S.saved = false;
+  autoSave();
+  render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function doSave(){
+  var el = document.getElementById("pname");
+  var name = el && el.value.trim() ? el.value.trim() : (S.partnerName || "");
+  if(!name){ toast("总得给 TA 起个代号吧"); if(el) el.focus(); return; }
+  var db = load();
+  var p = S.partnerId ? findPartner(db, S.partnerId) : null;
+  if(!p){
+    for(var i = 0; i < db.partners.length; i++) if(db.partners[i].name === name){ p = db.partners[i]; break; }
+  }
+  if(!p){
+    p = { id: newId(), name: name, relation: S.rel || "unknown", records: {}, created: todayKey() };
+    db.partners.push(p);
+  }
+  p.relation = S.rel || "unknown";
+  p.records = p.records || {};
+  p.records[nextRecKey(p, S.report.date || todayKey())] = stripRefs(S.report);
+  S.partnerId = p.id; S.partnerName = p.name;
+  db.lastId = p.id;
+  if(!save(db)){ toast("本机存储写入失败，没存上"); return; }
+  S.saved = true;
+  render();
+  toast("存好了");
+}
+
+/* 拆开一个信封或一封回信；成功返回 true */
+function tryUnlock(token, code){
+  var plain = unseal(token, code);
+  if(plain === null) return false;
+  var obj;
+  try{ obj = JSON.parse(plain); }catch(e){ return false; }
+  if(!obj) return false;
+  S.code = code; S.err = "";
+  if(obj.d) S.envDate = obj.d;
+  S.aText = obj.a || ""; S.bText = obj.b || "";
+  S.partnerName = obj.n || "";
+  if(obj.rel) S.rel = obj.rel;
+  if(obj.pid) S.partnerId = obj.pid;
+  if(typeof obj.b === "string"){
+    /* 回信：直接看报告，并归档到同一个搭档名下 */
+    S.role = "a";
+    S.report = appraise(S.aText, S.bText, obj.d || todayKey(), S.partnerId || "", S.rel || "unknown");
+    S.view = "report"; S.saved = false; S.sentBack = false;
+    autoSave();
+  } else {
+    S.role = "b";
+    S.view = "writeB";
+  }
+  return true;
+}
+
+function handle(act, el){
+  var db = load();
+  switch(act){
+    case "toA":
+      S.aText = ""; S.bText = ""; S.partnerId = null; S.partnerName = ""; S.rel = "unknown";
+      S.envDate = "";
+      S.report = null; S.role = ""; S.saved = false;
+      S.view = "writeA"; render();
+      break;
+    case "pickP": {
+      var p = findPartner(db, el.getAttribute("data-id"));
+      if(p){ S.partnerId = p.id; S.partnerName = p.name; S.rel = p.relation || "unknown"; }
+      S.aText = ""; S.bText = "";
+      S.view = "writeA"; render();
+      break;
+    }
+    case "pickHere": {
+      var pid0 = el.getAttribute("data-id") || "";
+      var pp = findPartner(db, pid0);
+      if(pp){ S.partnerId = pp.id; S.partnerName = pp.name; S.rel = pp.relation || "unknown"; }
+      else { S.partnerId = null; S.partnerName = ""; S.rel = "unknown"; }
+      render();
+      break;
+    }
+    case "sealA": {
+      var ta = document.getElementById("txt");
+      S.aText = ta ? ta.value : "";
+      if(S.aText.trim() === ""){
+        if(!confirm("一个字都没写。空白也算一种样本，确定封起来吗？")) break;
+      }
+      makeEnvelope();
+      S.view = "envelope"; render();
+      window.scrollTo({ top: 0 });
+      break;
+    }
+    case "copyLink":
+      copyText(S.pending.url, "链接已复制，发给 TA 吧");
+      break;
+    case "nearby":
+      /* 同一部设备接力：跳过链接，直接进入第二步 */
+      S.view = "writeB"; render();
+      break;
+    case "sealB": {
+      var tb = document.getElementById("txt");
+      S.bText = tb ? tb.value : "";
+      if(S.aText.trim() === "" && S.bText.trim() === ""){
+        if(!confirm("两个人都不说话。这样也能出报告，确定吗？")) break;
+      }
+      buildReport();
+      break;
+    }
+    case "sendBack": {
+      var pk = packURL("r", JSON.stringify({
+        a: S.aText, b: S.bText, d: S.report ? S.report.date : testDate(),
+        n: S.partnerName || "", rel: S.rel || "unknown", pid: S.partnerId || ""
+      }));
+      S.sentBack = true;
+      copyText(pk.url, "链接已复制。发给 TA，TA 点开就能看到同一份报告");
+      render();
+      break;
+    }
+    case "openSpec":
+      S.view = "spec"; S.openTier = ""; render(); window.scrollTo({ top: 0, behavior: "smooth" });
+      break;
+    case "tier": {
+      var tc = el.getAttribute("data-code") || "";
+      S.openTier = (S.openTier === tc) ? "" : tc;
+      render();
+      break;
+    }
+    case "copy":
+      copyReport(S.report);
+      break;
+    case "restart": {
+      /* 换一个人再测：清掉 URL 上的旧信封，回到干净的起点 */
+      try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){ try{ location.hash = ""; }catch(e2){} }
+      S.hashToken = ""; S.code = ""; S.pending = null;
+      S.aText = ""; S.bText = ""; S.report = null;
+      S.partnerId = null; S.partnerName = ""; S.rel = "unknown"; S.envDate = "";
+      S.role = ""; S.saved = false; S.err = ""; S.backView = "";
+      try{ localStorage.removeItem(KEY + "_pending"); }catch(e){}
+      sessClear();
+      S.view = "home"; render();
+      window.scrollTo({ top: 0 });
+      break;
+    }
+    case "home":
+      S.view = "home"; S.err = ""; render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      break;
+    case "clearHash":
+      try{ location.hash = ""; }catch(e){}
+      S.hashToken = ""; S.view = "home"; S.err = ""; render();
+      break;
+    case "pickRel":
+      S.rel = el.getAttribute("data-rel");
+      var box = document.getElementById("relBox");
+      if(box){
+        Array.prototype.forEach.call(box.children, function(c){
+          c.classList.toggle("on", c.getAttribute("data-rel") === S.rel);
+        });
+      }
+      break;
+    case "saveTo": {
+      var sp = findPartner(db, el.getAttribute("data-id"));
+      if(!sp) break;
+      S.partnerId = sp.id; S.partnerName = sp.name;
+      if(sp.relation && sp.relation !== "unknown") S.rel = sp.relation;
+      doSave();
+      break;
+    }
+    case "doSave":
+      doSave();
+      break;
+    case "toggleP": {
+      var id = el.getAttribute("data-id");
+      S.openPartner = (S.openPartner === id) ? null : id;
+      render();
+      break;
+    }
+    case "openDetail": {
+      S.detailPid = el.getAttribute("data-id");
+      S.view = "pdetail"; render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      break;
+    }
+    case "toArchive": {
+      S.detailPid = null; S.view = "archive"; render();
+      break;
+    }
+    case "share": {
+      if(!S.report){ toast("还没有报告"); break; }
+      S.shareFrom = S.view; S.view = "share"; render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      break;
+    }
+    case "backReport": {
+      S.view = (S.shareFrom === "oldReport") ? "oldReport" : "report";
+      render();
+      break;
+    }
+    case "qToggle": {
+      S.shareQuotes = (el.getAttribute("data-v") === "1");
+      render();
+      break;
+    }
+    case "saveImg": {
+      if(!S.shareURL){ toast("卡片还没画好"); break; }
+      var nm = "关系鉴定科-" + (S.report ? S.report.date : todayKey()) + ".png";
+      try{
+        var a = document.createElement("a");
+        a.href = S.shareURL; a.download = nm;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a);
+        toast("已保存，去相册看看");
+      }catch(e){ toast("保存失败，长按图片存吧"); }
+      break;
+    }
+    case "viewOld": {
+      var pid = el.getAttribute("data-pid"), d = el.getAttribute("data-date");
+      var p3 = findPartner(db, pid);
+      var rec = p3 && (p3.records || {})[d];
+      if(rec){
+        S.report = JSON.parse(JSON.stringify(rec));
+        S.aText = rec.a; S.bText = rec.b;
+        S.partnerId = pid; S.partnerName = p3.name; S.rel = p3.relation;
+        S.role = "a"; S.saved = true; S.backView = "";
+        S.view = "oldReport"; render();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      break;
+    }
+    case "delP": {
+      var did = el.getAttribute("data-id");
+      var p4 = findPartner(db, did);
+      if(!p4) break;
+      if(!confirm("删掉「" + p4.name + "」的全部记录？删了就没了。")) break;
+      db.partners = db.partners.filter(function(x){ return x.id !== did; });
+      if(S.partnerId === did){ S.partnerId = null; S.partnerName = ""; }
+      if(S.openPartner === did) S.openPartner = null;
+      if(db.lastId === did) db.lastId = db.partners.length ? db.partners[0].id : null;
+      save(db); S.view = "archive"; render();
+      toast("删掉了");
+      break;
+    }
+  }
+}
+
+function copyReport(r){
+  if(!r) return;
+  var txt =
+    "【关系鉴定科】\n" + r.no + " / " + md(r.date) + "\n" +
+    "──────────\n" +
+    "你写的：" + (String(r.a).trim() || "（没写）") + "\n" +
+    "TA 写的：" + (String(r.b).trim() || "（没写）") + "\n" +
+    "──────────\n" +
+    "默契指数：" + scoreText(r.score) + " / 100\n" +
+    r.verdict + "\n" +
+    "──────────\n" +
+    r.dims.map(function(d){ return d.q + "　" + d.lv + "\n  " + d.note; }).join("\n") + "\n" +
+    "──────────\n" +
+    "三项合起来：" + scoreText(r.score) + "\n" +
+    r.why + "\n" +
+    "──────────\n" +
+    "本工具不构成任何关于感情的建议，也不打算构成。";
+  copyText(txt, "已复制，去粘给 TA 看");
+}
+
+app.addEventListener("click", function(e){
+  var t = e.target.closest("[data-act]");
+  if(!t) return;
+  handle(t.getAttribute("data-act"), t);
+});
+/* 离开输入框前，先把正在打的字收进状态里 */
+function syncInput(){
+  var ta = document.getElementById("txt");
+  if(!ta) return;
+  if(S.view === "writeA") S.aText = ta.value;
+  else if(S.view === "writeB") S.bText = ta.value;
+}
+document.getElementById("tabToday").addEventListener("click", function(){
+  var back = S.backView;
+  S.backView = "";
+  if(back && back !== "archive" && back !== "home"){
+    var alive = true;
+    if(back === "envelope" && !S.pending) alive = false;
+    if((back === "report" || back === "oldReport") && !S.report) alive = false;
+    if(alive){ S.view = back; render(); window.scrollTo({ top: 0 }); return; }
+  }
+  S.view = "home"; render();
+});
+document.getElementById("tabArc").addEventListener("click", function(){
+  if(S.view !== "archive") S.backView = S.view;
+  syncInput();
+  S.view = "archive"; render();
+});
+app.addEventListener("input", function(e){
+  var t = e.target;
+  if(!t || t.id !== "txt") return;
+  if(S.view === "writeA") S.aText = t.value;
+  else if(S.view === "writeB") S.bText = t.value;
+  sessSave();
+});
+app.addEventListener("keydown", function(e){
+  if(e.key === "Enter" && (e.metaKey || e.ctrlKey)){
+    if(S.view === "writeA") handle("sealA");
+    if(S.view === "writeB") handle("sealB");
+  }
+});
+
+/* ══════════════ 入口：判断是不是别人发来的链接 ══════════════ */
+function loadPending(){
+  try{
+    var pd = localStorage.getItem(KEY + "_pending");
+    if(!pd) return null;
+    var o = JSON.parse(pd);
+    return (o && o.token) ? o : null;
+  }catch(e){ return null; }
+}
+/* 同一条链接刷新后，把写了一半的话和已存档状态接回来 */
+function sessResume(sess, token){
+  if(!sess || sess.hashToken !== token) return;
+  if(S.view === "writeB" && sess.bText) S.bText = sess.bText;
+  if(S.view === "report"){
+    S.saved = !!sess.saved; S.sentBack = !!sess.sentBack;
+    if(sess.partnerName) S.partnerName = sess.partnerName;
+    S.partnerId = sess.partnerId || null;
+  }
+}
+function boot(){
+  S.pending = loadPending();
+  var sess = sessLoad();
+  var h = location.hash.replace(/^#/, "").trim();
+  var pk = unpackHash(h);
+
+  if(h && !pk){ S.view = "broken"; render(); return; }
+
+  if(pk){
+    /* 是自己发出去的信封链接：回信封页 */
+    if(S.pending && S.pending.token === pk.token){
+      S.code = S.pending.code || "";
+      S.aText = S.pending.payload.a || "";
+      S.partnerName = S.pending.payload.n || "";
+      S.envDate = S.pending.payload.d || "";
+      S.view = "envelope"; render(); return;
+    }
+    /* 别人发来的：钥匙就在链接里，直接拆，不用输密码 */
+    if(tryUnlock(pk.token, pk.secret)){
+      S.hashToken = pk.token; S.backView = "";
+      sessResume(sess, pk.token);
+      render(); window.scrollTo({ top: 0 });
+      return;
+    }
+    S.view = "broken"; render(); return;
+  }
+  /* 没有信封链接：恢复本机上次的进度 */
+  if(sess && sessApply(sess)){ render(); return; }
+  if(S.pending){
+    S.code = S.pending.code || "";
+    S.aText = S.pending.payload.a || "";
+    S.partnerName = S.pending.payload.n || "";
+    S.envDate = S.pending.payload.d || "";
+    S.view = "envelope"; render(); return;
+  }
+  render();
+}
+boot();
+
+window.addEventListener("hashchange", function(){
+  /* 别人发来的新链接：在同一页面里直接切换，不再等手动刷新 */
+  S.err = ""; S.report = null; S.role = "";
+  S.saved = false; S.sentBack = false; S.backView = "";
+  S.aText = ""; S.bText = "";
+  boot();
+  window.scrollTo({ top: 0 });
+});
+
+window.__moqi = { appraise: appraise, features: features, buildDims: buildDims, seal: seal, unseal: unseal, scoreText: scoreText,
+  S: S, handle: handle, render: render, load: load, save: save, viewPDetail: viewPDetail, viewShare: viewShare,
+  drawCard: drawCard, cardDims: cardDims, QR: QR, QRN: QRN, bigChart: bigChart, streakOf: streakOf, dayBefore: dayBefore };
+})();
+</script>
+</body>
+</html>
