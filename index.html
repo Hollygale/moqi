@@ -1332,9 +1332,16 @@ function drawQR(ctx, x, y, size){
   }
 }
 function cardDims(r, withQ){
-  /* 两句话各最多 2 行；结论按字数估算行数 */
+  /* 结论按字数估行数；两句话各最多印 2 行（超出会截断） */
   var vlines = Math.max(1, Math.ceil(String(r.verdict || "").length / 30));
-  var qh = withQ ? 2 * (18 + 42 + 12) : 0;
+  var qh = 0;
+  if(withQ){
+    var ql = function(s){
+      var t = String(s || "").trim();
+      return Math.min(2, Math.max(1, Math.ceil(t.length / 40)));
+    };
+    qh = (18 + ql(r.a) * 21 + 12) + (18 + ql(r.b) * 21 + 12) + 8;
+  }
   return { W: 660, H: 720 + (vlines - 1) * 27 + qh };
 }
 function drawCard(ctx, r, withQ){
