@@ -533,18 +533,6 @@ var HIGH = [
   "这个分数出现在我们数据库里的概率是百分之零点三。恭喜。",
   "你们的相遇被记录在一份没人归档的文件里。"
 ];
-var NOTE = [
-  "采样窗口今日有灰，已做降噪处理。",
-  "收到第三方不明信号，已计入总分，来源不予说明。",
-  "隔壁装修，数据采集过程受到可感知干扰。",
-  "鉴定员今日情绪稳定，但在看到样本第三行时笑了一下。",
-  "当日湿度偏高，纸张含水率影响了部分读数。",
-  "有一只飞蛾在读数瞬间经过，我们尊重它的参与权。",
-  "样本送达时略有折痕，已在允许误差内予以忽略。",
-  "校准用的标准样本今天请假没来。",
-  "窗外有个人站了一会儿，不确定算不算变量。",
-  "读数过程中出现一次无法复现的异常，保留。"
-];
 var RELS = [
   { k: "couple", n: "情侣" }, { k: "friend", n: "朋友" }, { k: "buddy", n: "饭搭子" },
   { k: "colleague", n: "同事" }, { k: "family", n: "家人" }, { k: "classmate", n: "同学" },
@@ -773,8 +761,11 @@ function appraise(a, b, dateKey, pid, relation){
   }
   score = clamp(score, 65, 100);
 
-  /* 种子只由「两句话 + 日期」决定：两个人看到的必须是同一份报告 */
-  var seed = mix(hash(String(a) + "\u0001" + String(b)), hash(String(dateKey)));
+  /* 种子只由「两句话 + 日期」决定，且两句话谁先谁后都一样：
+     A 端和 B 端、先写的人和后写的人，看到的必须是同一份报告 */
+  var sa = String(a), sb = String(b);
+  var pair = (sa <= sb) ? (sa + "\u0001" + sb) : (sb + "\u0001" + sa);
+  var seed = mix(hash(pair), hash(String(dateKey)));
   /* 大多时候只留两位小数；偶尔不修约，让分数露出长长的小数尾巴 */
   var longMode = (seed % 17 === 0);
   score = longMode ? Math.round(score * 1e6) / 1e6 : Math.round(score * 100) / 100;
@@ -811,10 +802,8 @@ function appraise(a, b, dateKey, pid, relation){
   else if(hi.v - lo.v < 5) why = cnt + "项都差不多，没有哪一项特别突出。";
   else why = "主要是「" + hi.short + "」把分数拉上去的，「" + lo.short + "」拖了点后腿。";
 
-  var note = pick(NOTE, mix(seed, hash(dateKey)));
-
   return {
-    score: score, dims: dims, basis: basis, verdict: verdict, why: why, note: note, long: longMode,
+    score: score, dims: dims, basis: basis, verdict: verdict, why: why, long: longMode,
     a: a, b: b, date: dateKey, pid: pid || "", relation: relation || "unknown",
     no: "NO." + String(seed % 900000 + 100000),
     code: ""
@@ -891,6 +880,7 @@ var S = {
   report: null,                /* 当前报告 */
   role: "",                    /* a=收到回信的人, b=第二轮书写的人 */
   partnerId: null, partnerName: "", rel: "unknown",
+  envDate: "",          /* 这一次测试的日期，跟着信封走：两端永远是同一天 */
   openPartner: null,
   backView: "",                /* 去档案前待在哪个页面，回来时还原 */
   detailPid: null,             /* 档案详情：正在看谁 */
@@ -906,7 +896,7 @@ function sessSave(){
   try{
     localStorage.setItem(KEY + "_sess", JSON.stringify({
       view: S.view, aText: S.aText, bText: S.bText, code: S.code,
-      hashToken: S.hashToken, role: S.role, backView: S.backView,
+      hashToken: S.hashToken, role: S.role, backView: S.backView, envDate: S.envDate,
       partnerId: S.partnerId, partnerName: S.partnerName, rel: S.rel,
       saved: S.saved, sentBack: S.sentBack,
       report: S.report ? stripRefs(S.report) : null
@@ -928,6 +918,7 @@ function sessApply(o){
   S.role = o.role || ""; S.backView = o.backView || "";
   S.partnerId = o.partnerId || null; S.partnerName = o.partnerName || "";
   S.rel = o.rel || "unknown"; S.saved = !!o.saved; S.sentBack = !!o.sentBack;
+  S.envDate = o.envDate || "";
   S.report = o.report || null;
   var v = o.view || "home";
   if(v === "pdetail" || v === "share") v = "archive";
@@ -1149,7 +1140,7 @@ function renderReportCard(r){
     '</div>' +
     '<div class="basis"><h4>还 注 意 到</h4><ul>' +
       r.basis.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") +
-    '</ul><div class="fm">仪器备注：' + esc(r.note) + '（不影响得分）</div></div>' +
+    '</ul></div>' +
     viewSaveBar() +
     '<div class="acts">' +
       '<button class="btn" data-act="share">生 成 分 享 卡 片</button>' +
@@ -1627,14 +1618,22 @@ function fallbackCopy(txt, ok){
 
 function makeEnvelope(){
   var payload = { a: S.aText, d: todayKey(), n: S.partnerName || "", rel: S.rel || "unknown", pid: S.partnerId || "" };
+  S.envDate = payload.d;
+  sessSave();
   var pk = packURL("e", JSON.stringify(payload));
   S.code = pk.secret;
   S.pending = { token: pk.token, code: pk.secret, url: pk.url, payload: payload };
   try{ localStorage.setItem(KEY + "_pending", JSON.stringify(S.pending)); }catch(e){}
 }
 
+/* 这一次测试属于哪一天：以信封上的日期为准，两端拿到的一定是同一个 */
+function testDate(){
+  if(S.envDate) return S.envDate;
+  if(S.pending && S.pending.payload && S.pending.payload.d) return S.pending.payload.d;
+  return todayKey();
+}
 function buildReport(){
-  var r = appraise(S.aText, S.bText, todayKey(), S.partnerId || "", S.rel || "unknown");
+  var r = appraise(S.aText, S.bText, testDate(), S.partnerId || "", S.rel || "unknown");
   S.report = r;
   S.role = "b";
   S.view = "report";
@@ -1676,6 +1675,7 @@ function tryUnlock(token, code){
   try{ obj = JSON.parse(plain); }catch(e){ return false; }
   if(!obj) return false;
   S.code = code; S.err = "";
+  if(obj.d) S.envDate = obj.d;
   S.aText = obj.a || ""; S.bText = obj.b || "";
   S.partnerName = obj.n || "";
   if(obj.rel) S.rel = obj.rel;
@@ -1698,6 +1698,7 @@ function handle(act, el){
   switch(act){
     case "toA":
       S.aText = ""; S.bText = ""; S.partnerId = null; S.partnerName = ""; S.rel = "unknown";
+      S.envDate = "";
       S.report = null; S.role = ""; S.saved = false;
       S.view = "writeA"; render();
       break;
@@ -1745,7 +1746,7 @@ function handle(act, el){
     }
     case "sendBack": {
       var pk = packURL("r", JSON.stringify({
-        a: S.aText, b: S.bText, d: S.report ? S.report.date : todayKey(),
+        a: S.aText, b: S.bText, d: S.report ? S.report.date : testDate(),
         n: S.partnerName || "", rel: S.rel || "unknown", pid: S.partnerId || ""
       }));
       S.sentBack = true;
@@ -1761,7 +1762,7 @@ function handle(act, el){
       try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){ try{ location.hash = ""; }catch(e2){} }
       S.hashToken = ""; S.code = ""; S.pending = null;
       S.aText = ""; S.bText = ""; S.report = null;
-      S.partnerId = null; S.partnerName = ""; S.rel = "unknown";
+      S.partnerId = null; S.partnerName = ""; S.rel = "unknown"; S.envDate = "";
       S.role = ""; S.saved = false; S.err = ""; S.backView = "";
       try{ localStorage.removeItem(KEY + "_pending"); }catch(e){}
       sessClear();
@@ -1966,6 +1967,7 @@ function boot(){
       S.code = S.pending.code || "";
       S.aText = S.pending.payload.a || "";
       S.partnerName = S.pending.payload.n || "";
+      S.envDate = S.pending.payload.d || "";
       S.view = "envelope"; render(); return;
     }
     /* 别人发来的：钥匙就在链接里，直接拆，不用输密码 */
@@ -1983,6 +1985,7 @@ function boot(){
     S.code = S.pending.code || "";
     S.aText = S.pending.payload.a || "";
     S.partnerName = S.pending.payload.n || "";
+    S.envDate = S.pending.payload.d || "";
     S.view = "envelope"; render(); return;
   }
   render();
