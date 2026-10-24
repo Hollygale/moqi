@@ -81,6 +81,9 @@ body{
 
 /* ── 表单 ── */
 .field{margin-bottom:11px;}
+.whorow{margin:0 0 12px;}
+.whorow .pchips{margin-top:2px;}
+.saveto{margin:0 0 8px;}
 .flabel{font-size:11.5px;color:var(--ink2);font-weight:700;letter-spacing:.04em;margin-bottom:6px;display:block;}
 input[type=text],textarea{
   width:100%;border:1px solid var(--line);background:var(--paper);border-radius:11px;
@@ -344,7 +347,7 @@ svg.spark{display:block;width:100%;height:auto;}
   </div>
   <div id="app"></div>
   <div class="foot">
-    本科规定，及格线以下的关系不予出具。<br>
+    及格线以下的关系，不予出具。<br>
     <b>本工具不构成任何关于感情的建议，也不打算构成。</b>
   </div>
 </div>
@@ -358,6 +361,11 @@ svg.spark{display:block;width:100%;height:auto;}
 function p2(n){ return (n < 10 ? "0" : "") + n; }
 function todayKey(){ var d = new Date(); return "" + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()); }
 function md(k){ return (+k.slice(4,6)) + "月" + (+k.slice(6,8)) + "日"; }
+/* 同一天测了多次时，标签补上「第 N 次」 */
+function recLabel(k){
+  var m = String(k).match(/#(\d+)$/);
+  return m ? md(k) + " 第" + m[1] + "次" : md(k);
+}
 function clamp(v, a, b){ return v < a ? a : (v > b ? b : v); }
 function r2(v){ return Math.round(v * 100) / 100; }
 function esc(s){
@@ -475,7 +483,7 @@ var LOW = [
   "建议先加个联系方式，那种看不到动态的也行。",
   "收拾收拾，各回各家吧。",
   "你们之间隔着一片非常结实的空气。",
-  "这个分数主要体现了本科的大度。",
+  "这个分数主要体现了打分的人心软。",
   "相似度百分之十二，剩下的是礼貌。",
   "你们上辈子可能在同一趟地铁上见过，没说话。",
   "鉴定结论：认识，但不熟，也不打算熟。",
@@ -508,7 +516,7 @@ var MID = [
 ];
 var HIGH = [
   "你们上辈子在同一个山洞里啃树皮，啃的是同一张。",
-  "经本科认证：就是你了，跑不掉。",
+  "就是你了，跑不掉。",
   "检出共享脑回路，网速不同但信号同源。",
   "一人前半句，一人后半句，句号都懒得抢。",
   "相似度过高，疑似同一人分饰两角。",
@@ -527,12 +535,11 @@ var HIGH = [
 ];
 var NOTE = [
   "采样窗口今日有灰，已做降噪处理。",
-  "仪器午后出现一次轻微漂移，本科未予纠正。",
   "收到第三方不明信号，已计入总分，来源不予说明。",
   "隔壁装修，数据采集过程受到可感知干扰。",
   "鉴定员今日情绪稳定，但在看到样本第三行时笑了一下。",
   "当日湿度偏高，纸张含水率影响了部分读数。",
-  "有一只飞蛾在读数瞬间经过，本科尊重它的参与权。",
+  "有一只飞蛾在读数瞬间经过，我们尊重它的参与权。",
   "样本送达时略有折痕，已在允许误差内予以忽略。",
   "校准用的标准样本今天请假没来。",
   "窗外有个人站了一会儿，不确定算不算变量。",
@@ -675,7 +682,7 @@ function buildDims(f){
     lv: rawT >= 62 ? "说到了" : (rawT >= 30 ? "沾点边" : "各说各的")
   });
 
-  /* ② 你们写的差不多长吗？ */
+  /* ② 你们想得一样多吗？ */
   var rawE, eNote;
   if(f.la === 0 && f.lb === 0){ rawE = 0; eNote = "你们俩都没写字，这项没法比。"; }
   else if(f.la === 0 || f.lb === 0){
@@ -689,12 +696,12 @@ function buildDims(f){
     else eNote = "你写了 " + f.la + " 个字，TA 只写了 " + f.lb + " 个。有一个人在唱独角戏。";
   }
   dims.push({
-    key: "echo", q: "你们写的差不多长吗？", short: "写的长度", term: "篇幅呼应度", w: 0.30,
+    key: "echo", q: "你们想得一样多吗？", short: "想得一样多", term: "篇幅呼应度", w: 0.30,
     v: lift(rawE), note: eNote,
     lv: rawE >= 62 ? "差不多" : (rawE >= 30 ? "差一点" : "差挺多")
   });
 
-  /* ③ 你们说话的口气像不像？ */
+  /* ③ 你们的情绪有关联吗？ */
   var dist = Math.abs(f.ta.v - f.tb.v);
   var rawO, oNote, oLv, weak = false;
   if(f.bothEmpty){
@@ -724,10 +731,10 @@ function buildDims(f){
       else if(hb.length) oNote = "TA 用了「" + hb.slice(0, 2).join("」「") + "」，你什么都没加。一个在喊，一个在打字。";
       else oNote = "你们都没用什么感叹号，也没加语气词。两个人今天都很平静。";
     }
-    oLv = rawO >= 62 ? "很像" : (rawO >= 30 ? "还行" : "不太像");
+    oLv = rawO >= 62 ? "有关联" : (rawO >= 30 ? "有一点" : "没关联");
   }
   dims.push({
-    key: "tone", q: "你们说话的口气像不像？", short: "口气", term: "情绪同步率", w: 0.30,
+    key: "tone", q: "你们的情绪有关联吗？", short: "情绪", term: "情绪同步率", w: 0.30,
     v: lift(rawO), note: oNote, lv: oLv, weak: weak
   });
 
@@ -766,7 +773,8 @@ function appraise(a, b, dateKey, pid, relation){
   }
   score = clamp(score, 65, 100);
 
-  var seed = mix(hash(String(a) + "\u0001" + String(b)), hash(String(dateKey) + "\u0002" + String(pid) + "\u0003" + String(relation)));
+  /* 种子只由「两句话 + 日期」决定：两个人看到的必须是同一份报告 */
+  var seed = mix(hash(String(a) + "\u0001" + String(b)), hash(String(dateKey)));
   /* 大多时候只留两位小数；偶尔不修约，让分数露出长长的小数尾巴 */
   var longMode = (seed % 17 === 0);
   score = longMode ? Math.round(score * 1e6) / 1e6 : Math.round(score * 100) / 100;
@@ -791,7 +799,6 @@ function appraise(a, b, dateKey, pid, relation){
   if(/别|不要|算了/.test(all)) basis.push("省略了铺垫环节，说明彼此已经懒得客气。");
   if((all.match(/哈/g) || []).length >= 3) basis.push("笑了好几次，其中真笑次数不予公布。");
   if(f.sameChar === 0 && f.total > 0) basis.push("用词零重叠。这是在各自星球上写的两句话。");
-  if(basis.length === 0) basis.push("样本规整，没检出异常。这本身值得记一笔。");
   if(basis.length < 2) basis.push("建议明天再测一次，好有个对照。");
 
   /* 归因 */
@@ -841,6 +848,38 @@ function stripRefs(r){
   var o = {}, k;
   for(k in r){ if(Object.prototype.hasOwnProperty.call(r, k) && k !== "_p") o[k] = r[k]; }
   return o;
+}
+/* 同一天可以存多份：第一份用日期本身，之后依次 #2 #3，这样曲线才有多个点 */
+function nextRecKey(p, dateKey){
+  var recs = p.records || {};
+  if(recs[dateKey] === undefined) return dateKey;
+  var i = 2;
+  while(recs[dateKey + "#" + i] !== undefined) i++;
+  return dateKey + "#" + i;
+}
+/* 自动归档：已经知道是跟谁测的，就直接存进去，不用再手动点一次 */
+function autoSave(){
+  if(!S.report || S.saved) return false;
+  var db = load();
+  var p = S.partnerId ? findPartner(db, S.partnerId) : null;
+  if(!p && S.partnerName){
+    var nm = S.partnerName;
+    for(var i = 0; i < db.partners.length; i++) if(db.partners[i].name === nm){ p = db.partners[i]; break; }
+  }
+  /* 对方设备上建的档案：本机没有，就按同一个 id 建一份，这样两边档案是同一个人的 */
+  if(!p && S.partnerId && S.partnerName){
+    p = { id: S.partnerId, name: S.partnerName, relation: S.rel || "unknown", records: {}, created: todayKey() };
+    db.partners.push(p);
+  }
+  if(!p) return false;
+  p.records = p.records || {};
+  if(!p.relation || p.relation === "unknown") p.relation = S.rel || "unknown";
+  p.records[nextRecKey(p, S.report.date || todayKey())] = stripRefs(S.report);
+  S.partnerId = p.id; S.partnerName = p.name;
+  db.lastId = p.id;
+  if(!save(db)) return false;
+  S.saved = true;
+  return true;
 }
 
 /* ══════════════ 状态 ══════════════ */
@@ -948,10 +987,25 @@ function viewHome(){
   return h;
 }
 
+/* 选了人，报告出来就会自动进他/她的档案，不用再手动存 */
+function pickRow(){
+  var db = load();
+  if(!db.partners.length) return "";
+  return '<div class="whorow">' +
+    '<label class="flabel">这次是跟谁（选了会自动存档）</label>' +
+    '<div class="pchips">' +
+      db.partners.map(function(p){
+        return '<div class="pchip' + (p.id === S.partnerId ? " on" : "") + '" data-act="pickHere" data-id="' + p.id + '">' + esc(p.name) + '</div>';
+      }).join("") +
+      '<div class="pchip' + (S.partnerId ? "" : " on") + '" data-act="pickHere" data-id="">不 指 定</div>' +
+    '</div></div>';
+}
+
 function viewWriteA(){
   return '<div class="card">' +
     '<div class="ctitle">第 一 步 · 你 先 写<em>' + md(todayKey()) + '</em></div>' +
     stepBar(0) +
+    pickRow() +
     '<div class="field">' +
       '<label class="flabel">今天你想对 TA 说的一句话</label>' +
       '<textarea id="txt" rows="4" maxlength="80" placeholder="比如：今天中午那碗面太咸了"></textarea>' +
@@ -1027,8 +1081,15 @@ function viewWriteB(){
 
 function viewSaveBar(){
   if(S.saved) return '<div class="saverow"><div class="done">已存进 <b>' + esc(S.partnerName || "档案") + '</b> 的档案</div></div>';
+  var db = load();
+  var chips = db.partners.length
+    ? '<div class="pchips saveto">' + db.partners.map(function(p){
+        return '<div class="pchip" data-act="saveTo" data-id="' + p.id + '">' + esc(p.name) + '</div>';
+      }).join("") + '</div>'
+    : "";
   return '<div class="saverow">' +
-    '<div class="st">存进档案吗？（可以不存）</div>' +
+    '<div class="st">' + (chips ? "存到谁的档案？（点名字就行，也可以下面新起一个）" : "存进档案吗？（可以不存）") + '</div>' +
+    chips +
     '<input type="text" id="pname" maxlength="12" placeholder="TA 叫什么？真名外号都行，可以瞎起">' +
     '<div class="rel" id="relBox">' +
       RELS.map(function(r){
@@ -1116,7 +1177,7 @@ function viewArchive(){
     var rows = keys.map(function(k){
       var r = recs[k], v = scoreText(r.score);
       return '<div class="hrow" data-act="viewOld" data-pid="' + p.id + '" data-date="' + k + '">' +
-        '<div class="d">' + md(k) + '</div>' +
+        '<div class="d">' + recLabel(k) + '</div>' +
         '<div class="v' + (v.length > 5 ? " long" : "") + '">' + v + '</div>' +
         '<div class="t">' + esc(r.verdict) + '</div>' +
       '</div>';
@@ -1169,6 +1230,7 @@ function sparkline(recs){
 
 /* ── 档案详情：一个人的完整走势 ── */
 function dayBefore(k){
+  k = String(k).split("#")[0];
   var y = +k.slice(0,4), m = +k.slice(4,6), d = +k.slice(6,8);
   var t = new Date(y, m - 1, d);
   t.setDate(t.getDate() - 1);
@@ -1176,9 +1238,15 @@ function dayBefore(k){
   return String(t.getFullYear()) + (mm < 10 ? "0" : "") + mm + (dd < 10 ? "0" : "") + dd;
 }
 function streakOf(desc){
+  /* 同一天测了多次只算一天 */
+  var days = [], seen = {};
+  for(var j = 0; j < desc.length; j++){
+    var d0 = String(desc[j]).split("#")[0];
+    if(!seen[d0]){ seen[d0] = 1; days.push(d0); }
+  }
   var n = 1;
-  for(var i = 0; i < desc.length - 1; i++){
-    if(dayBefore(desc[i]) === desc[i + 1]) n++; else break;
+  for(var i = 0; i < days.length - 1; i++){
+    if(dayBefore(days[i]) === days[i + 1]) n++; else break;
   }
   return n;
 }
@@ -1249,7 +1317,7 @@ function viewPDetail(){
     trend = "这是你们的第一份。<b>多测几次</b>才看得出走势。";
   } else {
     var dv = recs[last].score - recs[prev].score;
-    trend = "最近一次 <b>" + scoreText(recs[last].score) + "</b>（" + md(last) + "），比上一次" +
+    trend = "最近一次 <b>" + scoreText(recs[last].score) + "</b>（" + recLabel(last) + "），比上一次" +
       (Math.abs(dv) < 0.05 ? "没什么变化" : (dv > 0 ? "高 <b>" + dv.toFixed(1) + "</b>" : "低 <b>" + Math.abs(dv).toFixed(1) + "</b>")) +
       "。<br>从头到尾 " + span + " 天，一共 " + n + " 次。";
   }
@@ -1268,8 +1336,8 @@ function viewPDetail(){
       stat(scoreText(avg), "平 均 分") +
       stat(n, "一 共 几 次") +
       stat(st + " 天", st > 1 ? "连 着 测 了" : "最 近 一 次", true) +
-      stat(scoreText(recs[hiK].score), "最 高 " + md(hiK)) +
-      stat(scoreText(recs[loK].score), "最 低 " + md(loK)) +
+      stat(scoreText(recs[hiK].score), "最 高 " + recLabel(hiK)) +
+      stat(scoreText(recs[loK].score), "最 低 " + recLabel(loK)) +
       stat((recs[hiK].score - recs[loK].score).toFixed(1), "最 大 起 伏") +
     '</div>' +
     '<div class="trend">' + trend + '</div>' +
@@ -1278,7 +1346,7 @@ function viewPDetail(){
     '<div class="hrows">' + desc.map(function(k){
       var r = recs[k], v = scoreText(r.score);
       return '<div class="hrow" data-act="viewOld" data-pid="' + p.id + '" data-date="' + k + '">' +
-        '<div class="d">' + md(k) + '</div>' +
+        '<div class="d">' + recLabel(k) + '</div>' +
         '<div class="v' + (v.length > 5 ? " long" : "") + '">' + v + '</div>' +
         '<div class="t">' + esc(r.verdict) + '</div>' +
       '</div>';
@@ -1558,7 +1626,7 @@ function fallbackCopy(txt, ok){
 }
 
 function makeEnvelope(){
-  var payload = { a: S.aText, d: todayKey(), n: S.partnerName || "" };
+  var payload = { a: S.aText, d: todayKey(), n: S.partnerName || "", rel: S.rel || "unknown", pid: S.partnerId || "" };
   var pk = packURL("e", JSON.stringify(payload));
   S.code = pk.secret;
   S.pending = { token: pk.token, code: pk.secret, url: pk.url, payload: payload };
@@ -1571,6 +1639,7 @@ function buildReport(){
   S.role = "b";
   S.view = "report";
   S.saved = false;
+  autoSave();
   render();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -1590,7 +1659,7 @@ function doSave(){
   }
   p.relation = S.rel || "unknown";
   p.records = p.records || {};
-  p.records[todayKey()] = stripRefs(S.report);
+  p.records[nextRecKey(p, S.report.date || todayKey())] = stripRefs(S.report);
   S.partnerId = p.id; S.partnerName = p.name;
   db.lastId = p.id;
   if(!save(db)){ toast("本机存储写入失败，没存上"); return; }
@@ -1610,11 +1679,13 @@ function tryUnlock(token, code){
   S.aText = obj.a || ""; S.bText = obj.b || "";
   S.partnerName = obj.n || "";
   if(obj.rel) S.rel = obj.rel;
+  if(obj.pid) S.partnerId = obj.pid;
   if(typeof obj.b === "string"){
-    /* 回信：直接看报告 */
+    /* 回信：直接看报告，并归档到同一个搭档名下 */
     S.role = "a";
     S.report = appraise(S.aText, S.bText, obj.d || todayKey(), S.partnerId || "", S.rel || "unknown");
     S.view = "report"; S.saved = false; S.sentBack = false;
+    autoSave();
   } else {
     S.role = "b";
     S.view = "writeB";
@@ -1635,6 +1706,14 @@ function handle(act, el){
       if(p){ S.partnerId = p.id; S.partnerName = p.name; S.rel = p.relation || "unknown"; }
       S.aText = ""; S.bText = "";
       S.view = "writeA"; render();
+      break;
+    }
+    case "pickHere": {
+      var pid0 = el.getAttribute("data-id") || "";
+      var pp = findPartner(db, pid0);
+      if(pp){ S.partnerId = pp.id; S.partnerName = pp.name; S.rel = pp.relation || "unknown"; }
+      else { S.partnerId = null; S.partnerName = ""; S.rel = "unknown"; }
+      render();
       break;
     }
     case "sealA": {
@@ -1666,7 +1745,8 @@ function handle(act, el){
     }
     case "sendBack": {
       var pk = packURL("r", JSON.stringify({
-        a: S.aText, b: S.bText, d: todayKey(), n: S.partnerName || "", rel: S.rel || "unknown"
+        a: S.aText, b: S.bText, d: S.report ? S.report.date : todayKey(),
+        n: S.partnerName || "", rel: S.rel || "unknown", pid: S.partnerId || ""
       }));
       S.sentBack = true;
       copyText(pk.url, "链接已复制。发给 TA，TA 点开就能看到同一份报告");
@@ -1706,6 +1786,14 @@ function handle(act, el){
         });
       }
       break;
+    case "saveTo": {
+      var sp = findPartner(db, el.getAttribute("data-id"));
+      if(!sp) break;
+      S.partnerId = sp.id; S.partnerName = sp.name;
+      if(sp.relation && sp.relation !== "unknown") S.rel = sp.relation;
+      doSave();
+      break;
+    }
     case "doSave":
       doSave();
       break;
