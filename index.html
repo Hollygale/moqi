@@ -416,12 +416,28 @@ function unseal(token, code){
   if(str.indexOf(MAGIC) !== 0) return null;
   return str.slice(MAGIC.length);
 }
-function newCode(){
-  var c = "";
-  for(var i = 0; i < 4; i++) c += Math.floor(Math.random() * 10);
+/* 钥匙直接跟着链接走：收到的人不用再输密码 */
+function newSecret(){
+  var A = "abcdefghijkmnpqrstuvwxyz23456789", c = "";
+  for(var i = 0; i < 8; i++) c += A.charAt(Math.floor(Math.random() * A.length));
   return c;
 }
 function baseURL(){ return location.href.split("#")[0]; }
+/* 打包成一条链接：#e<钥匙>_<密文> 或 #r<钥匙>_<密文> */
+function packURL(tag, plain){
+  var s = newSecret();
+  var t = seal(plain, s);
+  return { secret: s, token: t, url: baseURL() + "#" + tag + s + "_" + t };
+}
+function unpackHash(h){
+  if(!h) return null;
+  var tag = h.charAt(0);
+  if(tag !== "e" && tag !== "r") return null;
+  var rest = h.slice(1);
+  var i = rest.indexOf("_");
+  if(i < 1 || i >= rest.length - 1) return null;
+  return { kind: (tag === "r") ? "report" : "envelope", secret: rest.slice(0, i), token: rest.slice(i + 1) };
+}
 
 /* ══════════════ 语料库 ══════════════ */
 var LOW = [
@@ -807,6 +823,7 @@ var S = {
   role: "",                    /* a=收到回信的人, b=第二轮书写的人 */
   partnerId: null, partnerName: "", rel: "unknown",
   openPartner: null,
+  backView: "",                /* 去档案前待在哪个页面，回来时还原 */
   err: "",
   saved: false, sentBack: false
 };
@@ -817,7 +834,7 @@ function sessSave(){
   try{
     localStorage.setItem(KEY + "_sess", JSON.stringify({
       view: S.view, aText: S.aText, bText: S.bText, code: S.code,
-      hashToken: S.hashToken, unlockKind: S.unlockKind, role: S.role,
+      hashToken: S.hashToken, role: S.role, backView: S.backView,
       partnerId: S.partnerId, partnerName: S.partnerName, rel: S.rel,
       saved: S.saved, sentBack: S.sentBack,
       report: S.report ? stripRefs(S.report) : null
@@ -836,11 +853,12 @@ function sessApply(o){
   if(!o) return false;
   S.aText = o.aText || ""; S.bText = o.bText || "";
   S.code = o.code || ""; S.hashToken = o.hashToken || "";
-  S.unlockKind = o.unlockKind || ""; S.role = o.role || "";
+  S.role = o.role || ""; S.backView = o.backView || "";
   S.partnerId = o.partnerId || null; S.partnerName = o.partnerName || "";
   S.rel = o.rel || "unknown"; S.saved = !!o.saved; S.sentBack = !!o.sentBack;
   S.report = o.report || null;
   var v = o.view || "home";
+  if(v === "archive" && S.backView) v = S.backView;
   if(v === "report" || v === "oldReport"){
     if(!S.report) return false;
     S.view = "report";
@@ -849,7 +867,7 @@ function sessApply(o){
     S.view = "envelope";
   } else if(v === "writeB"){
     S.view = "writeB";
-  } else if(v === "writeA" || v === "unlock" || v === "home"){
+  } else if(v === "writeA" || v === "broken" || v === "home"){
     S.view = v;
   } else S.view = "home";
   return true;
@@ -925,34 +943,32 @@ function localWarn(){
 }
 function viewEnvelope(){
   var url = S.pending ? S.pending.url : "";
+  var n = chars((S.aText || "").replace(/\s/g, "")).length;
   return '<div class="card">' +
     '<div class="ctitle">信 封 已 封 好<em>第 二 步</em></div>' +
     localWarn() +
     stepBar(1) +
     '<div class="codebox">' +
-      '<div class="lb">开 信 封 码</div>' +
-      '<div class="num">' + esc(S.code) + '</div>' +
-      '<div class="sub">把这 4 位数<b>口头</b>告诉 TA<br>别和链接发在同一条消息里</div>' +
+      '<div class="lb">已 封 存</div>' +
+      '<div class="num">' + n + '</div>' +
+      '<div class="sub">个字，封在这条链接里<br>TA 只看得到这个数</div>' +
     '</div>' +
     '<div class="linkbox">' +
       '<input type="text" id="surl" readonly value="' + esc(url) + '">' +
       '<button data-act="copyLink">复制</button>' +
     '</div>' +
-    '<div class="tip">把链接发给 TA，TA 点开输入这 4 位数，就能写下自己那一句。<br>写完 TA 那边会出报告，再让 TA 把报告发回来给你。</div>' +
+    '<div class="tip">把链接发给 TA，<b>TA 点开直接就能写</b>，不用输密码。<br>你写的那句话在链接里是加密的，TA 拆开之前看不到。</div>' +
     '<button class="btn" data-act="nearby">TA 就 在 旁 边，直 接 让 TA 写</button>' +
     '<button class="btn ghost" style="margin-top:9px" data-act="home">回 首 页</button>' +
   '</div>';
 }
 
-function viewUnlock(kind){
+function viewBroken(){
   return '<div class="card"><div class="unlockbox">' +
-    '<div class="ic">' + (kind === "report" ? "\u2709" : "\u2709") + '</div>' +
-    '<div class="t">' + (kind === "report" ? "TA 把报告寄回来了" : "TA 给你寄了一个信封") + '</div>' +
-    '<div class="s">' + (kind === "report" ? "输入开信封码就能看到报告" : "输入 TA 告诉你的 4 位数，就能写下你那一句") + '</div>' +
-    '<div class="codein"><input type="text" id="code" maxlength="4" inputmode="numeric" placeholder="0000"></div>' +
-    '<div class="err">' + esc(S.err) + '</div>' +
-    '<button class="btn red" data-act="doUnlock">拆 开</button>' +
-    '<button class="btn ghost" style="margin-top:9px" data-act="clearHash">不 是 给 我 的，回 首 页</button>' +
+    '<div class="ic">\u2709</div>' +
+    '<div class="t">这条链接不完整</div>' +
+    '<div class="s">可能是转发时被截断了，也可能是旧版本生成的。<br>让 TA 重新写一句、重新发一次。</div>' +
+    '<button class="btn red" data-act="clearHash">回 首 页</button>' +
   '</div></div>';
 }
 
@@ -1043,7 +1059,7 @@ function renderReportCard(r){
     '<div class="acts">' +
       (S.role === "a" ? "" :
         '<button class="btn red" data-act="sendBack">' + (S.sentBack ? "再 复 制 一 次 链 接" : "把 报 告 寄 回 给 TA") + '</button>' +
-        (S.sentBack ? '<div class="tip" style="margin-top:-4px">链接发出去了。TA 点开后要输<b>你告诉过 TA 的那 4 位数</b>，才会看到这份报告。</div>' : '')) +
+        (S.sentBack ? '<div class="tip" style="margin-top:-4px">链接发出去了。<b>TA 点开就能看到这份报告</b>，不用输密码。</div>' : '')) +
       '<button class="btn ghost" data-act="copy">复 制</button>' +
       '<button class="btn ghost" data-act="restart">换 个 人 再 测</button>' +
     '</div>' +
@@ -1124,7 +1140,7 @@ function render(){
   if(S.view === "home") html = viewHome();
   else if(S.view === "writeA") html = viewWriteA();
   else if(S.view === "envelope") html = viewEnvelope();
-  else if(S.view === "unlock") html = viewUnlock(S.unlockKind);
+  else if(S.view === "broken") html = viewBroken();
   else if(S.view === "writeB") html = viewWriteB();
   else if(S.view === "report" || S.view === "oldReport") html = renderReportCard(S.report);
   else if(S.view === "archive") html = viewArchive();
@@ -1137,10 +1153,6 @@ function render(){
   if(S.view === "writeA" || S.view === "writeB"){
     var ta = document.getElementById("txt");
     if(ta) setTimeout(function(){ ta.focus(); }, 60);
-  }
-  if(S.view === "unlock"){
-    var ci = document.getElementById("code");
-    if(ci) setTimeout(function(){ ci.focus(); }, 60);
   }
   if((S.view === "writeA" && S.aText) || (S.view === "writeB" && S.bText)){
     var t2 = document.getElementById("txt");
@@ -1173,11 +1185,10 @@ function fallbackCopy(txt, ok){
 }
 
 function makeEnvelope(){
-  var code = newCode();
   var payload = { a: S.aText, d: todayKey(), n: S.partnerName || "" };
-  var token = seal(JSON.stringify(payload), code);
-  S.code = code;
-  S.pending = { token: token, code: code, url: baseURL() + "#e" + token, payload: payload };
+  var pk = packURL("e", JSON.stringify(payload));
+  S.code = pk.secret;
+  S.pending = { token: pk.token, code: pk.secret, url: pk.url, payload: payload };
   try{ localStorage.setItem(KEY + "_pending", JSON.stringify(S.pending)); }catch(e){}
 }
 
@@ -1235,7 +1246,6 @@ function tryUnlock(token, code){
     S.role = "b";
     S.view = "writeB";
   }
-  render();
   return true;
 }
 
@@ -1272,17 +1282,6 @@ function handle(act, el){
       /* 同一部设备接力：跳过链接，直接进入第二步 */
       S.view = "writeB"; render();
       break;
-    case "doUnlock": {
-      var ci = document.getElementById("code");
-      var code = ci ? String(ci.value || "").trim() : "";
-      if(!/^\d{4}$/.test(code)){ S.err = "是 4 位数字"; render(); break; }
-      if(!tryUnlock(S.hashToken, code)){
-        S.err = "码不对，再去问 TA 一遍";
-        render(); break;
-      }
-      window.scrollTo({ top: 0 });
-      break;
-    }
     case "sealB": {
       var tb = document.getElementById("txt");
       S.bText = tb ? tb.value : "";
@@ -1293,12 +1292,11 @@ function handle(act, el){
       break;
     }
     case "sendBack": {
-      var token = seal(JSON.stringify({
+      var pk = packURL("r", JSON.stringify({
         a: S.aText, b: S.bText, d: todayKey(), n: S.partnerName || "", rel: S.rel || "unknown"
-      }), S.code);
-      var url = baseURL() + "#r" + token;
+      }));
       S.sentBack = true;
-      copyText(url, "链接已复制。发给 TA，TA 点开输那 4 位数就能看到同一份报告");
+      copyText(pk.url, "链接已复制。发给 TA，TA 点开就能看到同一份报告");
       render();
       break;
     }
@@ -1311,7 +1309,7 @@ function handle(act, el){
       S.hashToken = ""; S.code = ""; S.pending = null;
       S.aText = ""; S.bText = ""; S.report = null;
       S.partnerId = null; S.partnerName = ""; S.rel = "unknown";
-      S.role = ""; S.saved = false; S.err = "";
+      S.role = ""; S.saved = false; S.err = ""; S.backView = "";
       try{ localStorage.removeItem(KEY + "_pending"); }catch(e){}
       sessClear();
       S.view = "home"; render();
@@ -1352,7 +1350,7 @@ function handle(act, el){
         S.report = JSON.parse(JSON.stringify(rec));
         S.aText = rec.a; S.bText = rec.b;
         S.partnerId = pid; S.partnerName = p3.name; S.rel = p3.relation;
-        S.role = "a"; S.saved = true;
+        S.role = "a"; S.saved = true; S.backView = "";
         S.view = "oldReport"; render();
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
@@ -1399,10 +1397,27 @@ app.addEventListener("click", function(e){
   if(!t) return;
   handle(t.getAttribute("data-act"), t);
 });
+/* 离开输入框前，先把正在打的字收进状态里 */
+function syncInput(){
+  var ta = document.getElementById("txt");
+  if(!ta) return;
+  if(S.view === "writeA") S.aText = ta.value;
+  else if(S.view === "writeB") S.bText = ta.value;
+}
 document.getElementById("tabToday").addEventListener("click", function(){
+  var back = S.backView;
+  S.backView = "";
+  if(back && back !== "archive" && back !== "home"){
+    var alive = true;
+    if(back === "envelope" && !S.pending) alive = false;
+    if((back === "report" || back === "oldReport") && !S.report) alive = false;
+    if(alive){ S.view = back; render(); window.scrollTo({ top: 0 }); return; }
+  }
   S.view = "home"; render();
 });
 document.getElementById("tabArc").addEventListener("click", function(){
+  if(S.view !== "archive") S.backView = S.view;
+  syncInput();
   S.view = "archive"; render();
 });
 app.addEventListener("input", function(e){
@@ -1428,27 +1443,40 @@ function loadPending(){
     return (o && o.token) ? o : null;
   }catch(e){ return null; }
 }
+/* 同一条链接刷新后，把写了一半的话和已存档状态接回来 */
+function sessResume(sess, token){
+  if(!sess || sess.hashToken !== token) return;
+  if(S.view === "writeB" && sess.bText) S.bText = sess.bText;
+  if(S.view === "report"){
+    S.saved = !!sess.saved; S.sentBack = !!sess.sentBack;
+    if(sess.partnerName) S.partnerName = sess.partnerName;
+    S.partnerId = sess.partnerId || null;
+  }
+}
 function boot(){
   S.pending = loadPending();
   var sess = sessLoad();
   var h = location.hash.replace(/^#/, "").trim();
+  var pk = unpackHash(h);
 
-  if(h){
-    var tag = h.charAt(0);
-    S.hashToken = (tag === "r" || tag === "e") ? h.slice(1) : h;
-    S.unlockKind = (tag === "r") ? "report" : "envelope";
-    /* 之前已经拆开过这个信封：免输码，直接回原处 */
-    if(sess && sess.hashToken === S.hashToken && sess.code){
-      if(tryUnlock(S.hashToken, sess.code)) return;
-    }
-    /* 是自己发出去的信封：回信封页 */
-    if(S.pending && S.pending.token === S.hashToken){
+  if(h && !pk){ S.view = "broken"; render(); return; }
+
+  if(pk){
+    /* 是自己发出去的信封链接：回信封页 */
+    if(S.pending && S.pending.token === pk.token){
       S.code = S.pending.code || "";
       S.aText = S.pending.payload.a || "";
       S.partnerName = S.pending.payload.n || "";
       S.view = "envelope"; render(); return;
     }
-    S.view = "unlock"; render(); return;
+    /* 别人发来的：钥匙就在链接里，直接拆，不用输密码 */
+    if(tryUnlock(pk.token, pk.secret)){
+      S.hashToken = pk.token; S.backView = "";
+      sessResume(sess, pk.token);
+      render(); window.scrollTo({ top: 0 });
+      return;
+    }
+    S.view = "broken"; render(); return;
   }
   /* 没有信封链接：恢复本机上次的进度 */
   if(sess && sessApply(sess)){ render(); return; }
@@ -1465,7 +1493,7 @@ boot();
 window.addEventListener("hashchange", function(){
   /* 别人发来的新链接：在同一页面里直接切换，不再等手动刷新 */
   S.err = ""; S.report = null; S.role = "";
-  S.saved = false; S.sentBack = false;
+  S.saved = false; S.sentBack = false; S.backView = "";
   S.aText = ""; S.bText = "";
   boot();
   window.scrollTo({ top: 0 });
