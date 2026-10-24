@@ -281,6 +281,33 @@ svg.spark{display:block;width:100%;height:auto;}
 .hrow .t{flex:1;min-width:0;font-size:11px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .del{margin-top:11px;font-size:10.5px;color:var(--ink4);letter-spacing:.1em;background:none;border:none;font-family:inherit;text-decoration:underline;cursor:pointer;padding:0;}
 
+/* ── 搭档档案详情 ── */
+.pdet .ptop{padding:16px 16px 12px;display:flex;align-items:center;gap:12px;}
+.pdet .ptop .av{width:44px;height:44px;flex:none;border-radius:14px;background:var(--redbg);border:1px solid #F0DFDA;display:flex;align-items:center;justify-content:center;color:var(--red);font-size:17px;font-weight:800;}
+.pdet .ptop .info{flex:1;min-width:0;}
+.pdet .ptop b{display:block;font-size:17px;letter-spacing:.05em;}
+.pdet .ptop span{display:block;font-size:10.5px;color:var(--ink3);letter-spacing:.07em;margin-top:3px;}
+.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 16px 4px;}
+.statgrid .s{background:var(--paper);border:1px solid var(--line2);border-radius:11px;padding:10px 4px 9px;text-align:center;}
+.statgrid .s b{display:block;font-family:"Times New Roman",Georgia,serif;font-weight:700;font-size:18px;line-height:1.25;font-variant-numeric:tabular-nums;}
+.statgrid .s b.sm{font-size:14.5px;}
+.statgrid .s span{display:block;font-size:9.5px;color:var(--ink3);letter-spacing:.1em;margin-top:3px;}
+.trend{margin:12px 16px 0;font-size:12px;color:var(--ink2);line-height:1.85;background:var(--paper);border:1px solid var(--line2);border-radius:11px;padding:11px 13px;}
+.trend b{font-family:"Times New Roman",Georgia,serif;font-size:14.5px;}
+.sech{margin:18px 16px 2px;font-size:9.5px;letter-spacing:.2em;color:var(--ink3);font-weight:700;}
+.pdet .hrows{margin:0 16px;}
+.morelink{display:block;width:100%;text-align:center;font-size:11px;letter-spacing:.12em;color:var(--ink3);background:var(--paper);border:1px solid var(--line2);border-radius:9px;padding:8px 0;margin-top:10px;font-family:inherit;cursor:pointer;}
+.morelink:hover{color:var(--ink);}
+
+/* ── 分享卡片 ── */
+.sharebox{margin:0 16px 12px;}
+.sharebox img{width:100%;display:block;border-radius:13px;border:1px solid var(--line);background:#fff;}
+.sharebox .ph{width:100%;border-radius:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink4);font-size:11.5px;padding:40px 0;text-align:center;}
+.chiprow{display:flex;gap:7px;margin:0 16px 12px;}
+.chiprow span{flex:1;text-align:center;font-size:11.5px;padding:8px 4px;border:1px solid var(--line);border-radius:20px;color:var(--ink2);background:#fff;cursor:pointer;}
+.chiprow span.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+.sharetip{margin:0 16px 14px;font-size:11px;color:var(--ink3);line-height:1.8;text-align:center;}
+
 .empty{text-align:center;padding:26px 10px 12px;color:var(--ink3);font-size:12.5px;line-height:1.95;}
 .empty .em{font-size:26px;display:block;margin-bottom:8px;opacity:.45;}
 
@@ -399,6 +426,9 @@ function unb64url(str){
 }
 var MAGIC = "MQ1|";
 var WEB = "https://hollygale.github.io/moqi/";
+/* 入口二维码矩阵（离线生成，pyzbar 实测可扫） */
+var QRN = 33;
+var QR = "000000000000000000000000000000000000000000000000000000000000000000001111111001011010000100111111100001000001001010000111000100000100001011101001101011010000101110100001011101001110100101000101110100001011101000110000001000101110100001000001011011001110110100000100001111111010101010101010111111100000000000000110101110010000000000001001011011111010101011010000000000110100111001101100010100100100001001001100110111010100101111000001100000101100100100110011011000000110101010010011110111100101100001010100110000111100111000000000001101001011101110011011111111100000011100111000000111010101101000000000011011111101010111000001000000110000100100110010001110100100001001101011100010010010110001100000011100000010011111110101001100001000101111100001101111111010000000000000010000010100110001011100001111111001110000110010101001000001000001011111011001110001110000001011101001000000010011111000100001011101011110100000100111111000001011101000000010010100001110100001000001001100010111110110001000001111111010010101010010000101000000000000000000000000000000000000000000000000000000000000000000000";
 function seal(plain, code){
   var bytes = utf8(MAGIC + plain);
   var iv = [];
@@ -824,6 +854,9 @@ var S = {
   partnerId: null, partnerName: "", rel: "unknown",
   openPartner: null,
   backView: "",                /* 去档案前待在哪个页面，回来时还原 */
+  detailPid: null,             /* 档案详情：正在看谁 */
+  shareQuotes: true,           /* 分享卡片：要不要印上两个人的原话 */
+  shareFrom: "report", shareURL: "",
   err: "",
   saved: false, sentBack: false
 };
@@ -858,6 +891,7 @@ function sessApply(o){
   S.rel = o.rel || "unknown"; S.saved = !!o.saved; S.sentBack = !!o.sentBack;
   S.report = o.report || null;
   var v = o.view || "home";
+  if(v === "pdetail" || v === "share") v = "archive";
   if(v === "archive" && S.backView) v = S.backView;
   if(v === "report" || v === "oldReport"){
     if(!S.report) return false;
@@ -1057,6 +1091,9 @@ function renderReportCard(r){
     '</ul><div class="fm">仪器备注：' + esc(r.note) + '（不影响得分）</div></div>' +
     viewSaveBar() +
     '<div class="acts">' +
+      '<button class="btn" data-act="share">生 成 分 享 卡 片</button>' +
+    '</div>' +
+    '<div class="acts">' +
       (S.role === "a" ? "" :
         '<button class="btn red" data-act="sendBack">' + (S.sentBack ? "再 复 制 一 次 链 接" : "把 报 告 寄 回 给 TA") + '</button>' +
         (S.sentBack ? '<div class="tip" style="margin-top:-4px">链接发出去了。<b>TA 点开就能看到这份报告</b>，不用输密码。</div>' : '')) +
@@ -1095,6 +1132,7 @@ function viewArchive(){
       '<div class="body">' +
         (keys.length ? sparkline(recs) : '') +
         rows +
+        '<button class="morelink" data-act="openDetail" data-id="' + p.id + '">看 完 整 档 案 ›</button>' +
         '<button class="del" data-act="delP" data-id="' + p.id + '">删 掉 这 个 人</button>' +
       '</div>' +
     '</div>';
@@ -1129,6 +1167,331 @@ function sparkline(recs){
     dots + labs + vals + '</svg>';
 }
 
+/* ── 档案详情：一个人的完整走势 ── */
+function dayBefore(k){
+  var y = +k.slice(0,4), m = +k.slice(4,6), d = +k.slice(6,8);
+  var t = new Date(y, m - 1, d);
+  t.setDate(t.getDate() - 1);
+  var mm = t.getMonth() + 1, dd = t.getDate();
+  return String(t.getFullYear()) + (mm < 10 ? "0" : "") + mm + (dd < 10 ? "0" : "") + dd;
+}
+function streakOf(desc){
+  var n = 1;
+  for(var i = 0; i < desc.length - 1; i++){
+    if(dayBefore(desc[i]) === desc[i + 1]) n++; else break;
+  }
+  return n;
+}
+function bigChart(recs, asc){
+  if(asc.length < 2) return "";
+  var k = asc.slice(-30);
+  var W = 358, H = 138, PL = 30, PR = 12, PT = 18, PB = 24, lo = 65, hi = 100;
+  var X = function(i){ return PL + i * (W - PL - PR) / (k.length - 1); };
+  var Y = function(v){ return PT + (1 - (clamp(v, lo, hi) - lo) / (hi - lo)) * (H - PT - PB); };
+  var pts = k.map(function(d, i){ return [X(i), Y(recs[d].score), recs[d].score, d]; });
+  var poly = pts.map(function(p){ return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" ");
+  var area = "M" + pts[0][0].toFixed(1) + "," + (H - PB) + " L" + poly.split(" ").join(" L") +
+             " L" + pts[pts.length - 1][0].toFixed(1) + "," + (H - PB) + " Z";
+  var grid = [70, 80, 90, 100].map(function(v){
+    return '<line x1="' + PL + '" y1="' + Y(v) + '" x2="' + (W - PR) + '" y2="' + Y(v) +
+      '" stroke="' + (v === 100 ? "#E6DED3" : "#F1EBE3") + '" stroke-width="1"/>' +
+      '<text x="' + (PL - 6) + '" y="' + (Y(v) + 3) + '" font-size="8" fill="#B5A99F" text-anchor="end">' + v + '</text>';
+  }).join("");
+  var dots = pts.map(function(p){
+    return '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3" fill="#1A1614"/>';
+  }).join("");
+  var step = Math.ceil(k.length / 6);
+  var labs = pts.map(function(p, i){
+    if(i % step !== 0 && i !== pts.length - 1) return "";
+    return '<text x="' + p[0].toFixed(1) + '" y="' + (H - 8) + '" font-size="8" fill="#9C9088" text-anchor="middle">' +
+      (+p[3].slice(4,6)) + "/" + (+p[3].slice(6,8)) + '</text>';
+  }).join("");
+  var lastP = pts[pts.length - 1];
+  var mark = '<text x="' + lastP[0].toFixed(1) + '" y="' + (lastP[1] - 10).toFixed(1) +
+    '" font-size="10" font-weight="700" fill="#D0392A" text-anchor="end" font-family="Georgia,serif">' +
+    lastP[2].toFixed(1) + '</text>';
+  return '<svg class="spark big" viewBox="0 0 ' + W + ' ' + H + '">' +
+    grid +
+    '<path d="' + area + '" fill="#E9E1D6" opacity=".55"/>' +
+    '<polyline points="' + poly + '" fill="none" stroke="#1A1614" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>' +
+    dots + labs + mark + '</svg>';
+}
+function viewPDetail(){
+  var db = load();
+  var p = null;
+  for(var i = 0; i < db.partners.length; i++) if(db.partners[i].id === S.detailPid) p = db.partners[i];
+  if(!p){
+    return '<div class="card"><div class="empty">这个人已经不在档案里了</div>' +
+      '<div class="acts"><button class="btn ghost" data-act="toArchive">回 档 案</button></div></div>';
+  }
+  var recs = p.records || {};
+  var asc = Object.keys(recs).sort(), desc = asc.slice().reverse();
+  var n = asc.length;
+  if(!n){
+    return '<div class="card pdet">' +
+      '<div class="ptop"><div class="av">' + esc(chars(p.name)[0] || "?") + '</div>' +
+      '<div class="info"><b>' + esc(p.name) + '</b><span>' + relName(p.relation) + ' · 还没有记录</span></div></div>' +
+      '<div class="empty">还没跟 TA 测过</div>' +
+      '<div class="acts"><button class="btn ghost" data-act="toArchive">回 档 案</button>' +
+      '<button class="btn ghost" data-act="restart">去 测 一 次</button></div></div>';
+  }
+  var sum = asc.reduce(function(s, k){ return s + recs[k].score; }, 0);
+  var avg = sum / n;
+  var hiK = asc.reduce(function(a, k){ return recs[k].score > recs[a].score ? k : a; }, asc[0]);
+  var loK = asc.reduce(function(a, k){ return recs[k].score < recs[a].score ? k : a; }, asc[0]);
+  var last = desc[0], prev = desc[1];
+  var st = streakOf(desc);
+  var span = n > 1 ? Math.round((new Date(+asc[n-1].slice(0,4), +asc[n-1].slice(4,6)-1, +asc[n-1].slice(6,8)) -
+    new Date(+asc[0].slice(0,4), +asc[0].slice(4,6)-1, +asc[0].slice(6,8))) / 86400000) + 1 : 1;
+
+  var trend;
+  if(n === 1){
+    trend = "这是你们的第一份。<b>多测几次</b>才看得出走势。";
+  } else {
+    var dv = recs[last].score - recs[prev].score;
+    trend = "最近一次 <b>" + scoreText(recs[last].score) + "</b>（" + md(last) + "），比上一次" +
+      (Math.abs(dv) < 0.05 ? "没什么变化" : (dv > 0 ? "高 <b>" + dv.toFixed(1) + "</b>" : "低 <b>" + Math.abs(dv).toFixed(1) + "</b>")) +
+      "。<br>从头到尾 " + span + " 天，一共 " + n + " 次。";
+  }
+
+  var stat = function(v, lab, sm){
+    return '<div class="s"><b class="' + (sm ? "sm" : "") + '">' + v + '</b><span>' + lab + '</span></div>';
+  };
+
+  return '<div class="card pdet">' +
+    '<div class="ptop">' +
+      '<div class="av">' + esc(chars(p.name)[0] || "?") + '</div>' +
+      '<div class="info"><b>' + esc(p.name) + '</b>' +
+      '<span>' + relName(p.relation) + ' · 从 ' + md(asc[0]) + ' 开始</span></div>' +
+    '</div>' +
+    '<div class="statgrid">' +
+      stat(scoreText(avg), "平 均 分") +
+      stat(n, "一 共 几 次") +
+      stat(st + " 天", st > 1 ? "连 着 测 了" : "最 近 一 次", true) +
+      stat(scoreText(recs[hiK].score), "最 高 " + md(hiK)) +
+      stat(scoreText(recs[loK].score), "最 低 " + md(loK)) +
+      stat((recs[hiK].score - recs[loK].score).toFixed(1), "最 大 起 伏") +
+    '</div>' +
+    '<div class="trend">' + trend + '</div>' +
+    (n > 1 ? '<div class="sech">分 数 走 势</div><div style="margin:0 16px">' + bigChart(recs, asc) + '</div>' : '') +
+    '<div class="sech">每 一 次</div>' +
+    '<div class="hrows">' + desc.map(function(k){
+      var r = recs[k], v = scoreText(r.score);
+      return '<div class="hrow" data-act="viewOld" data-pid="' + p.id + '" data-date="' + k + '">' +
+        '<div class="d">' + md(k) + '</div>' +
+        '<div class="v' + (v.length > 5 ? " long" : "") + '">' + v + '</div>' +
+        '<div class="t">' + esc(r.verdict) + '</div>' +
+      '</div>';
+    }).join("") + '</div>' +
+    '<div style="padding:0 16px 16px">' +
+      '<button class="morelink" data-act="toArchive">返 回 档 案</button>' +
+      '<button class="del" style="margin-top:12px;display:block;margin-left:auto;margin-right:auto" data-act="delP" data-id="' + p.id + '">删 掉 这 个 人</button>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ══════════════ 分享卡片（canvas 画，纯前端） ══════════════ */
+var F_SANS = '"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",Helvetica,Arial,sans-serif';
+var F_SERIF = 'Georgia,"Times New Roman",serif';
+function wrapLines(ctx, text, maxW){
+  var out = [], line = "";
+  text = String(text || "");
+  for(var i = 0; i < text.length; i++){
+    var ch = text.charAt(i);
+    if(ch === "\n"){ out.push(line); line = ""; continue; }
+    if(line && ctx.measureText(line + ch).width > maxW){ out.push(line); line = ch; }
+    else line += ch;
+  }
+  if(line) out.push(line);
+  return out;
+}
+function spWidth(ctx, text, sp){
+  var w = 0;
+  for(var i = 0; i < text.length; i++) w += ctx.measureText(text.charAt(i)).width + sp;
+  return w - sp;
+}
+function spText(ctx, text, x, y, sp, align){
+  var w = spWidth(ctx, text, sp);
+  var cx = (align === "center") ? x - w / 2 : (align === "right" ? x - w : x);
+  for(var i = 0; i < text.length; i++){
+    var ch = text.charAt(i);
+    ctx.fillText(ch, cx, y);
+    cx += ctx.measureText(ch).width + sp;
+  }
+  return w;
+}
+function drawQR(ctx, x, y, size){
+  var n = QRN, m = size / n;
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillRect(x, y, size, size);
+  ctx.fillStyle = "#1A1614";
+  for(var r = 0; r < n; r++){
+    for(var c = 0; c < n; c++){
+      if(QR.charAt(r * n + c) === "1") ctx.fillRect(x + c * m, y + r * m, m + 0.6, m + 0.6);
+    }
+  }
+}
+function cardDims(r, withQ){
+  /* 两句话各最多 2 行；结论按字数估算行数 */
+  var vlines = Math.max(1, Math.ceil(String(r.verdict || "").length / 30));
+  var qh = withQ ? 2 * (18 + 42 + 12) : 0;
+  return { W: 660, H: 720 + (vlines - 1) * 27 + qh };
+}
+function drawCard(ctx, r, withQ){
+  var D = cardDims(r, withQ), W = D.W, y = 0, M = 46;
+  ctx.clearRect(0, 0, W, D.H);
+  ctx.fillStyle = "#F2EEE8";
+  ctx.fillRect(0, 0, W, D.H);
+  ctx.fillStyle = "#1A1614";
+  ctx.textBaseline = "alphabetic";
+
+  /* 抬头 */
+  ctx.font = '700 19px ' + F_SANS;
+  spText(ctx, "关 系 鉴 定 科", M, 54, 4);
+  ctx.font = '11px ' + F_SANS;
+  ctx.fillStyle = "#9C9088";
+  ctx.textAlign = "left";
+  ctx.fillText(r.no + "  ·  " + md(r.date), M, 78);
+
+  /* 红色印章 */
+  ctx.save();
+  ctx.translate(W - M - 52, 46);
+  ctx.rotate(-0.13);
+  ctx.strokeStyle = "#D0392A"; ctx.lineWidth = 2.2;
+  ctx.strokeRect(-44, -22, 88, 44);
+  ctx.fillStyle = "#D0392A"; ctx.font = '700 15px ' + F_SANS;
+  spText(ctx, "已 鉴 定", 0, 6, 3, "center");
+  ctx.restore();
+
+  /* 分数 */
+  y = 150;
+  ctx.fillStyle = "#9C9088"; ctx.font = '10.5px ' + F_SANS;
+  spText(ctx, "默 契 指 数", W / 2, y, 3, "center");
+  var st = scoreText(r.score);
+  ctx.fillStyle = "#1A1614";
+  ctx.font = '700 ' + (st.length > 5 ? 58 : (st.length > 4 ? 68 : 84)) + 'px ' + F_SERIF;
+  ctx.textAlign = "center";
+  ctx.fillText(st, W / 2, y + (st.length > 5 ? 78 : 86));
+  ctx.font = '11px ' + F_SANS; ctx.fillStyle = "#9C9088";
+  ctx.fillText("满分 100 · 最低 65", W / 2, y + 108);
+
+  /* 刻度条 */
+  var bx = M + 40, bw = W - (M + 40) * 2, by = y + 132;
+  ctx.strokeStyle = "#DCD3C7"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + bw, by); ctx.stroke();
+  var pos = clamp((r.score - 65) / 35, 0, 1);
+  ctx.fillStyle = "#D0392A";
+  ctx.beginPath(); ctx.arc(bx + bw * pos, by, 5.5, 0, Math.PI * 2); ctx.fill();
+
+  /* 结论 */
+  y = by + 42;
+  ctx.fillStyle = "#1A1614"; ctx.font = '16px ' + F_SANS;
+  var vl = wrapLines(ctx, r.verdict, W - M * 2);
+  for(var i = 0; i < vl.length; i++){
+    ctx.fillText(vl[i], W / 2, y + i * 27);
+  }
+  y += vl.length * 27 + 16;
+
+  /* 两句话 */
+  if(withQ){
+    var pair = [["你 写 的", r.a], ["TA 写 的", r.b]];
+    for(var pi = 0; pi < 2; pi++){
+      var lab = pair[pi][0], txt = String(pair[pi][1] || "").trim() || "（这个人一个字都没写）";
+      ctx.fillStyle = "#9C9088"; ctx.font = '10px ' + F_SANS; ctx.textAlign = "left";
+      spText(ctx, lab, M, y + 2, 2);
+      ctx.font = '14px ' + F_SANS; ctx.fillStyle = "#3A3330";
+      var lines = wrapLines(ctx, txt, W - M * 2 - 8);
+      if(lines.length > 2){ lines = lines.slice(0, 2); lines[1] = lines[1].slice(0, -1) + "…"; }
+      for(var li = 0; li < lines.length; li++){
+        ctx.fillText(lines[li], M + 2, y + 24 + li * 21);
+      }
+      ctx.strokeStyle = "#E3DCD2"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(M, y + 10); ctx.lineTo(W - M, y + 10); ctx.stroke();
+      y += 18 + lines.length * 21 + 12;
+    }
+    y += 8;
+  }
+
+  /* 三项 */
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#9C9088"; ctx.font = '10px ' + F_SANS;
+  spText(ctx, "我 们 比 了 三 件 事", M, y + 12, 3);
+  y += 28;
+  for(var di = 0; di < r.dims.length; di++){
+    var d = r.dims[di];
+    ctx.fillStyle = "#1A1614"; ctx.font = '13px ' + F_SANS;
+    ctx.fillText(d.q, M, y + 14);
+    ctx.textAlign = "right";
+    ctx.fillStyle = d.weak ? "#B5A99F" : (d.v >= 86 ? "#D0392A" : "#3A3330");
+    ctx.font = '700 13px ' + F_SANS;
+    ctx.fillText(d.weak ? "没测" : d.lv + "  " + scoreText(d.v), W - M, y + 14);
+    ctx.textAlign = "left";
+    /* 条 */
+    var ty = y + 24, tw = W - M * 2;
+    ctx.fillStyle = "#E6DED3";
+    ctx.fillRect(M, ty, tw, 3);
+    if(!d.weak){
+      ctx.fillStyle = d.v >= 86 ? "#D0392A" : "#1A1614";
+      ctx.fillRect(M, ty, Math.max(6, tw * clamp((d.v - 65) / 35, 0, 1)), 3);
+    }
+    y += 52;
+  }
+
+  /* 页脚：二维码 */
+  var fy = D.H - 118;
+  ctx.strokeStyle = "#E3DCD2"; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(M, fy - 18); ctx.lineTo(W - M, fy - 18); ctx.stroke();
+  var qs = 92;
+  drawQR(ctx, M, fy, qs);
+  ctx.fillStyle = "#1A1614"; ctx.font = '700 14px ' + F_SANS;
+  ctx.fillText("扫一扫，你也来测", M + qs + 18, fy + 30);
+  ctx.fillStyle = "#3A3330"; ctx.font = '11.5px ' + F_SANS;
+  ctx.fillText("两个人，各写一句，", M + qs + 18, fy + 52);
+  ctx.fillText("谁也不许看谁的", M + qs + 18, fy + 70);
+  ctx.fillStyle = "#B5A99F"; ctx.font = '10px ' + F_SANS;
+  ctx.fillText(WEB.replace(/^https?:\/\//, "").replace(/\/$/, ""), M + qs + 18, fy + 90);
+  return D.H;
+}
+function viewShare(){
+  var r = S.report;
+  if(!r) return '<div class="card"><div class="empty">没有可分享的报告</div>' +
+    '<div class="acts"><button class="btn ghost" data-act="backReport">回 报 告</button></div></div>';
+  return '<div class="card">' +
+    '<div class="ctitle">分 享 卡 片<em>存 图 发 出 去</em></div>' +
+    '<div class="chiprow">' +
+      '<span data-act="qToggle" data-v="1" class="' + (S.shareQuotes ? "on" : "") + '">印 上 原 话</span>' +
+      '<span data-act="qToggle" data-v="0" class="' + (S.shareQuotes ? "" : "on") + '">只 印 分 数</span>' +
+    '</div>' +
+    '<div class="sharebox"><img id="shareImg" alt="关系鉴定科报告卡片"></div>' +
+    '<div class="sharetip">' + (S.shareQuotes
+      ? "卡片上会有你们俩写的原话。不想让别人看到，就切「只印分数」。"
+      : "卡片上只有分数和结论，两句原话不会印上去。") + '</div>' +
+    '<div class="acts">' +
+      '<button class="btn red" data-act="saveImg">保 存 图 片</button>' +
+      '<button class="btn ghost" data-act="backReport">回 报 告</button>' +
+    '</div>' +
+    '<div class="sharetip" style="margin-top:-4px">手机上如果点了没反应，就<b>长按上面的图片</b>保存。</div>' +
+  '</div>';
+}
+function paintShare(){
+  var img = document.getElementById("shareImg");
+  if(!img || !S.report) return;
+  try{
+    var D = cardDims(S.report, S.shareQuotes);
+    var cv = document.createElement("canvas");
+    var sc = 2;
+    cv.width = D.W * sc; cv.height = D.H * sc;
+    var ctx = cv.getContext("2d");
+    if(!ctx){ img.parentNode.innerHTML = '<div class="ph">这个浏览器画不了卡片</div>'; return; }
+    ctx.scale(sc, sc);
+    drawCard(ctx, S.report, S.shareQuotes);
+    S.shareURL = cv.toDataURL("image/png");
+    img.src = S.shareURL;
+  }catch(e){
+    if(img.parentNode) img.parentNode.innerHTML = '<div class="ph">画卡片时出了点问题</div>';
+  }
+}
+
 /* ══════════════ 渲染 ══════════════ */
 function render(){
   var tab = document.getElementById("tabToday"), tab2 = document.getElementById("tabArc");
@@ -1143,7 +1506,9 @@ function render(){
   else if(S.view === "broken") html = viewBroken();
   else if(S.view === "writeB") html = viewWriteB();
   else if(S.view === "report" || S.view === "oldReport") html = renderReportCard(S.report);
+  else if(S.view === "share") html = viewShare();
   else if(S.view === "archive") html = viewArchive();
+  else if(S.view === "pdetail") html = viewPDetail();
 
   app.innerHTML = html;
   app.classList.remove("fadein");
@@ -1158,6 +1523,7 @@ function render(){
     var t2 = document.getElementById("txt");
     if(t2) t2.value = (S.view === "writeA") ? S.aText : S.bText;
   }
+  if(S.view === "share") paintShare();
   sessSave();
 }
 
@@ -1342,6 +1708,44 @@ function handle(act, el){
       render();
       break;
     }
+    case "openDetail": {
+      S.detailPid = el.getAttribute("data-id");
+      S.view = "pdetail"; render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      break;
+    }
+    case "toArchive": {
+      S.detailPid = null; S.view = "archive"; render();
+      break;
+    }
+    case "share": {
+      if(!S.report){ toast("还没有报告"); break; }
+      S.shareFrom = S.view; S.view = "share"; render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      break;
+    }
+    case "backReport": {
+      S.view = (S.shareFrom === "oldReport") ? "oldReport" : "report";
+      render();
+      break;
+    }
+    case "qToggle": {
+      S.shareQuotes = (el.getAttribute("data-v") === "1");
+      render();
+      break;
+    }
+    case "saveImg": {
+      if(!S.shareURL){ toast("卡片还没画好"); break; }
+      var nm = "关系鉴定科-" + (S.report ? S.report.date : todayKey()) + ".png";
+      try{
+        var a = document.createElement("a");
+        a.href = S.shareURL; a.download = nm;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a);
+        toast("已保存，去相册看看");
+      }catch(e){ toast("保存失败，长按图片存吧"); }
+      break;
+    }
     case "viewOld": {
       var pid = el.getAttribute("data-pid"), d = el.getAttribute("data-date");
       var p3 = findPartner(db, pid);
@@ -1499,7 +1903,9 @@ window.addEventListener("hashchange", function(){
   window.scrollTo({ top: 0 });
 });
 
-window.__moqi = { appraise: appraise, features: features, buildDims: buildDims, seal: seal, unseal: unseal, scoreText: scoreText };
+window.__moqi = { appraise: appraise, features: features, buildDims: buildDims, seal: seal, unseal: unseal, scoreText: scoreText,
+  S: S, handle: handle, render: render, load: load, save: save, viewPDetail: viewPDetail, viewShare: viewShare,
+  drawCard: drawCard, cardDims: cardDims, QR: QR, QRN: QRN, bigChart: bigChart, streakOf: streakOf, dayBefore: dayBefore };
 })();
 </script>
 </body>
